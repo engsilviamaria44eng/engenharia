@@ -1,0 +1,24 @@
+﻿tipo;codigo;referencia;descricao;unidade;quantidade;coeficiente;custo_unitario
+Etapa;1;;Serviços preliminares;;;;
+Item;1.1;;Locação da obra com gabarito de madeira;m²;210;;12,80
+Item;1.2;;Instalações provisórias de canteiro;vb;1;;18500,00
+Etapa;2;;Fundação;;;;
+Item;2.1;;Estaca escavada Ø 30 cm, concreto fck 25 MPa;m;180;;142,50
+Item;2.2;;Viga baldrame em concreto armado;m³;14,5;;2380,00
+Etapa;3;;Estrutura;;;;
+Item;3.1;;Pilares em concreto armado fck 25 MPa;m³;22;;2650,00
+Item;3.2;;Laje maciça em concreto armado, e = 12 cm;m²;240;;215,00
+Etapa;4;;Alvenaria;;;;
+Item;4.1;ALV-014;Alvenaria de vedação com bloco cerâmico 14x19x39 cm, com argamassa de assentamento;m²;1250;;70,15
+Material;4.1;;Bloco cerâmico de vedação 14x19x39 cm;un;;13;2,10
+Material;4.1;;Argamassa de assentamento, traço 1:2:8;m³;;0,011;520,00
+Mão de obra;4.1;;Pedreiro, com encargos;h;;0,75;28,50
+Mão de obra;4.1;;Servente, com encargos;h;;0,75;21,00
+Etapa;5;;Instalações elétricas;;;;
+Item;5.1;;Eletroduto PVC flexível corrugado Ø 25 mm, embutido;m;860;;14,20
+Item;5.2;;Caixa de passagem 4x2 em PVC;un;145;;9,80
+Etapa;6;;Revestimentos;;;;
+Item;6.1;;Chapisco em parede interna, traço 1:3;m²;2100;;6,40
+Item;6.2;;Massa única (reboco) interna, e = 2 cm;m²;2100;;32,90
+Etapa;7;;Forros;;;;
+Item;7.1;;Forro de gesso em placas 60x60 cm;m²;380;;58,00
