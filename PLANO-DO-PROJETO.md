@@ -470,7 +470,7 @@ No lançamento, um botão **"Repetir a lista de ontem"** evita que o mestre digi
 - **`diario_equipamentos`:** o mesmo que o diário (o mestre lança no dia, o engenheiro sempre). O cliente não vê.
 - **`empreiteiros`:** o engenheiro e o mestre veem. O cliente não vê.
 - **`fotos`:** os membros veem. O cliente vê só as que o engenheiro liberou (`visivel_cliente = sim`). Só o engenheiro muda esse campo.
-- **Criar e editar o diário, os avanços e as fotos:** o mestre, só no dia. O engenheiro, sempre.
+- **Criar e editar o diário, os avanços e as fotos:** o mestre, só no dia (diário atrasado é só do engenheiro, confirmado). O engenheiro, qualquer dia desde o início da obra, inclusive **diários atrasados de meses passados** (pedido pelo engenheiro, 18/10/2026). O diário atrasado fica marcado com a data em que foi lançado, entra em ordem de data no histórico (o painel e o cronograma são recalculados) e não muda o número de nenhum RDO: **RDO nº = dia da obra** (dias corridos desde o início). A tela Diário mostra os "dias sem diário" para passar a limpo.
 - **Apagar qualquer coisa:** só o engenheiro.
 - **Sem login:** nada.
 

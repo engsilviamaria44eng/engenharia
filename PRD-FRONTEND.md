@@ -358,7 +358,7 @@ A lista de todas as frentes da obra, inclusive as concluídas, na ordem do iníc
 **O que aparece**
 Um formulário de uma coluna só, com botões grandes, feito para o celular em pé no canteiro:
 
-1. **Data:** hoje, fixa para o mestre.
+1. **Data:** hoje, fixa para o mestre. Para o engenheiro, há o seletor **"Data do diário"**, que começa em hoje e aceita **qualquer dia desde o início da obra**, inclusive meses atrás (ver "Diário atrasado", abaixo). Quando a data não é hoje, aparece uma faixa amarela no topo: "Diário de {data} · lançado com atraso". Se aquele dia já tem diário, a tela abre com ele preenchido.
 2. **Clima por período:** três linhas, **Manhã**, **Tarde** e **Noite**, cada uma com quatro botões grandes (`Sol`, `Nublado`, `Chuva`, `Chuva forte`) e o valor escolhido escrito ao lado do nome do período. Tocar de novo no botão marcado desmarca. Cada período é opcional e aparece como "não informado".
 3. **Frentes trabalhadas hoje:** a lista das frentes em andamento e das não iniciadas. Para cada frente que o mestre tocar, abrem:
    - o avanço acumulado, com um deslizador de 0 a 100 de 5 em 5 e um campo numérico ao lado. O valor começa no último avanço lançado;
@@ -376,7 +376,7 @@ Um formulário de uma coluna só, com botões grandes, feito para o celular em p
 | Clima — manhã | escolha | não | `Sol`, `Nublado`, `Chuva`, `Chuva forte` |
 | Clima — tarde | escolha | não | as mesmas opções |
 | Clima — noite | escolha | não | as mesmas opções |
-| Avanço acumulado | % de 0 a 100 | sim, para cada frente marcada | não pode ser menor que o último lançado. Se for, aparece o aviso "Menor que o último lançado (60%). Confirma?" |
+| Avanço acumulado | % de 0 a 100 | sim, para cada frente marcada | não pode ser menor que o lançado no dia anterior mais próximo. Se for, aparece o aviso "Menor que o último lançado (60%). Confirma?". **Num diário atrasado**, também não pode passar do avanço do diário seguinte já lançado para aquela frente ("Em 20/08 esta frente já estava em 45%. O valor tem que ficar entre 30% e 45%.") |
 | Efetivo por função | função + quantidade (inteiro ≥ 0) | não | lista fixa de 14 funções + as que o mestre acrescentar. Quantidade 0 não é gravada |
 | Outra função | texto | não | primeira letra maiúscula. Se já existir com outro jeito de escrever (ex.: "pedreiro"), soma na que existe em vez de duplicar |
 | Serviço concluído | sim/não | sim | |
@@ -388,13 +388,23 @@ Um formulário de uma coluna só, com botões grandes, feito para o celular em p
 | Ocorrências | texto longo | não | |
 
 **Ações**
-- **Salvar diário:** grava tudo e mostra "Diário de hoje salvo". Se já existe diário de hoje, a tela abre preenchida e salvar atualiza o mesmo diário.
-- **Repetir a lista de ontem:** copia os equipamentos do último diário.
-- **Tirar foto:** abre a câmera. A foto aparece em miniatura logo depois.
+- **Salvar diário:** grava tudo e mostra "Diário de hoje salvo" (ou "Diário de 12/08/2026 salvo", num atrasado). Se o dia já tem diário, a tela abre preenchida e salvar atualiza o mesmo diário.
+- **Repetir a lista do dia anterior:** copia os equipamentos do diário **com a data anterior mais próxima** (não do último lançado), para o atrasado não herdar a lista de hoje.
+- **Tirar foto:** abre a câmera. **Num diário atrasado**, o botão vira **"Escolher fotos da galeria"**, porque as fotos daquele dia já estão no celular ou no computador. A foto aparece em miniatura logo depois.
 
 **Regras por perfil**
-- **Mestre:** só lança e edita o dia de hoje.
-- **Engenheiro:** pode escolher a data e editar qualquer dia.
+- **Mestre:** só lança e edita o dia de hoje. **Não lança diário atrasado** (decisão do engenheiro, 18/10/2026): não vê o seletor de data nem a lista de "dias sem diário".
+- **Engenheiro:** escolhe qualquer data desde o início da obra até hoje e edita qualquer dia. Data futura e data antes do início da obra são recusadas.
+
+### Diário atrasado (pedido pelo engenheiro)
+
+Serve para passar a limpo meses de diário que ficaram no caderno ou no WhatsApp.
+
+- **Pode:** qualquer dia entre a data de início da obra e hoje. Nunca data futura.
+- **Fica marcado:** todo diário guarda **quando foi lançado** (`created_at`), além do dia a que se refere (`data`). Se foi lançado depois do próprio dia, aparece a etiqueta **"Lançado em 18/10/2026"** na lista do Diário, no Dia do diário e no rodapé do RDO. Ninguém confunde registro feito na hora com registro passado a limpo depois.
+- **Não bagunça o painel:** o avanço de cada frente continua em ordem de data (o lançamento atrasado entra no meio do histórico, entre o dia anterior e o seguinte). O ritmo real, os dias sem andar, a data limite e o cronograma físico-financeiro são recalculados com o histórico completo. O realizado de agosto, por exemplo, sobe quando os diários de agosto são lançados.
+- **Não mexe nos números do RDO** (ver Número do RDO, na tela PDF do diário).
+- **Clima e equipe são opcionais**, porque quem passa a limpo nem sempre lembra. Avanço por frente continua obrigatório para cada frente marcada.
 
 **Estado vazio**
 Se a obra não tem frentes: "Ainda não há frentes nesta obra. Peça ao engenheiro para cadastrar."
@@ -414,6 +424,8 @@ No topo, dois botões: **"Lançar hoje"** e **"Gerar PDF"**. Abaixo, a lista de 
 **Ações**
 - **Tocar num dia:** abre o Dia do diário.
 - **Lançar (engenheiro):** abre Lançar hoje, com a escolha da data.
+- **Dias sem diário (engenheiro):** um aviso no topo da lista, por exemplo "38 dias úteis sem diário desde o início da obra · Ver", abre a lista desses dias por mês (agosto: 2, 3, 9…), cada um com o botão **"Lançar"**, que abre o formulário já naquela data. Na conta entram segunda a sábado. `[DESCOBRIR NO USO: se sábado conta como dia de obra]`
+- **Etiqueta "Lançado em {data}"** nas linhas de diários passados a limpo depois do dia.
 - **Editar (engenheiro):** abre o dia no formulário de Lançar hoje.
 - **Chave "Cliente vê" (engenheiro):** libera ou esconde a foto para o cliente na hora.
 - **Liberar todas da semana (engenheiro):** pede confirmação ("Liberar 12 fotos para o cliente?") e liga a chave de todas as fotos dos últimos 7 dias.
@@ -491,7 +503,8 @@ No topo, o botão **"Salvar em PDF"** e uma linha explicando o que vai sair (ex.
 - **Salvar em PDF:** abre a impressão do navegador, já em A4 e só com as folhas, sem menu nem botões. Ali, a pessoa escolhe "Salvar como PDF" (ou manda direto para a impressora). Não precisa de biblioteca nenhuma: é a impressão do próprio navegador, com uma folha de estilo de impressão.
 - **Voltar:** volta para o Diário de obra.
 
-**Número do RDO:** é a posição do diário na obra, em ordem de data (o primeiro diário da obra é o RDO nº 1). É calculado, não digitado.
+**Número do RDO:** é o **dia da obra**, contado em dias corridos desde a data de início (o dia do início é o RDO nº 1, o dia seguinte é o nº 2, e assim por diante). É calculado, não digitado. Assim, lançar um diário atrasado **nunca muda o número de um RDO que já existe**, nem de um já impresso e assinado. Dias sem diário viram buracos na numeração, e isso é esperado. (Antes, a regra era a posição em ordem de data; ela foi trocada por causa do diário atrasado.)
+**RDO de diário atrasado:** o rodapé mostra "Lançado em {data do lançamento} · referente a {data do dia}".
 
 ---
 

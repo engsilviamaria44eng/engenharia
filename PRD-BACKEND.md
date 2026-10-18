@@ -380,8 +380,14 @@ Escrito em português. Vira RLS na hora de construir.
 - **Ver:** membros `Engenheiro` e `Mestre`. O cliente não vê.
 - **Criar e editar:**
   - mestre da obra, **só quando a data do diário é hoje** (fuso de São Paulo);
-  - engenheiro da obra, qualquer data.
+  - engenheiro da obra, **qualquer data entre `obras.data_inicio` e hoje** (diário atrasado). Data futura ou anterior ao início da obra é recusada pelo banco, não só pela tela.
 - **Apagar:** engenheiro da obra.
+
+**Diário atrasado:**
+- **Sem coluna nova:** `diarios.created_at` guarda quando foi lançado, e `diarios.data`, o dia a que se refere. "Atrasado" = `created_at` (na data de São Paulo) depois de `data`, calculado na consulta.
+- **Ordem do avanço:** ao gravar `diario_avancos`, o banco confere que o `avanco_acumulado` fica **entre** o do diário anterior e o do diário seguinte da mesma frente, em ordem de `data`. Fora disso, recusa com a mensagem que a tela mostra. O mesmo vale ao editar um dia antigo.
+- **Status da frente:** o gatilho de status olha o avanço do diário de **data mais recente** da frente, não o do último lançado. Um diário atrasado de agosto não reabre uma frente concluída em setembro.
+- **Fotos de diário atrasado:** vêm da galeria. `fotos.created_at` = quando subiu; a data da foto é a do diário.
 
 ### `fotos`
 - **Ver:**
@@ -540,7 +546,7 @@ Permissões: só o engenheiro da obra vê. Ninguém edita nem apaga pela tela (�
 ## PDF do diário (RDO)
 
 - **Nenhuma tabela nova.** O RDO é montado no navegador a partir de `diarios`, `diario_avancos`, `diario_efetivo`, `diario_equipamentos` e `fotos`, e salvo em PDF pela impressão do navegador. O PDF não é guardado no Storage.
-- **Número do RDO:** a posição do diário na obra, em ordem de `data` (calculada na consulta, não é coluna). Como um diário só pode ser apagado pelo engenheiro, a numeração só muda se ele apagar um dia antigo.
+- **Número do RDO:** `data − obras.data_inicio + 1` (o dia da obra, em dias corridos), calculado na consulta, não é coluna. Lançar um diário atrasado ou apagar um dia **não muda o número de nenhum outro RDO**. (Substitui a regra antiga, "posição em ordem de data", que renumeraria RDOs já assinados.)
 - **Permissões:** quem gera é quem já pode ler o diário, ou seja, membros `Engenheiro` e `Mestre`. O cliente não lê essas tabelas, então não consegue gerar o RDO.
 - **Fotos no RDO:** entram todas as fotos do dia (inclusive as não liberadas ao cliente), pelo mesmo link temporário do Storage.
 
@@ -557,6 +563,10 @@ Permissões: só o engenheiro da obra vê. Ninguém edita nem apaga pela tela (�
 - [ ] Logado como o mestre do Jardim Europa, uma consulta direta a `frentes`, `diarios` e `fotos` **não devolve nenhuma linha do Vila Nova**. Testado, não presumido.
 - [ ] Logado como mestre, consultar `frentes_valores`, `obras_valores`, `medicoes` ou `medicao_itens` devolve zero linhas.
 - [ ] O mestre consegue lançar o diário de hoje, mas não consegue editar o de ontem.
+- [ ] O engenheiro lança um diário de 3 meses atrás; o RDO de um dia posterior já existente mantém o mesmo número.
+- [ ] Um diário com data futura, ou antes do início da obra, é recusado pelo banco.
+- [ ] Num diário atrasado, um avanço maior que o do diário seguinte da mesma frente é recusado.
+- [ ] Um diário atrasado de agosto não reabre uma frente marcada como Concluída em setembro.
 - [ ] Logado como cliente, consultar `frentes`, `diarios`, `diario_avancos`, `empreiteiros` ou `frentes_valores` devolve zero linhas.
 - [ ] O cliente lê `fotos` e recebe só as liberadas. Tentar abrir o arquivo de uma foto não liberada falha.
 - [ ] A função do resumo devolve o avanço por ambiente para o cliente da obra e recusa a mesma chamada para outra obra.
