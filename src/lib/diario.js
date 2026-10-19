@@ -112,13 +112,19 @@ export function equipamentosDoDia(diario) {
 }
 
 // ---------- avanço ----------
-// O último avanço lançado para a frente ANTES da data (o diário anterior mais próximo).
-// Sem diário anterior, vale o avanço que a frente tinha no cadastro.
+// O avanço lançado para a frente no diário anterior mais próximo da data; null se não há.
+export function avancoAntes(diarios, frenteId, data) {
+  const anterior = (diarios ?? []).filter((d) => d.data < data && d.servicos.some((s) => s.frente_id === frenteId))
+    .sort((a, b) => b.data.localeCompare(a.data))[0]
+  return anterior ? anterior.servicos.find((s) => s.frente_id === frenteId).avanco : null
+}
+
+// O último avanço lançado para a frente ANTES da data. Sem diário anterior: se já há diário
+// DEPOIS (diário atrasado lançado antes do primeiro), parte de 0; senão vale o do cadastro.
 export function ultimoAvanco(diarios, frente, data) {
-  const anteriores = (diarios ?? []).filter((d) => d.data < data && d.servicos.some((s) => s.frente_id === frente.id))
-    .sort((a, b) => b.data.localeCompare(a.data))
-  if (anteriores.length === 0) return frente.avanco ?? 0
-  return anteriores[0].servicos.find((s) => s.frente_id === frente.id).avanco
+  const antes = avancoAntes(diarios, frente.id, data)
+  if (antes != null) return antes
+  return proximoAvanco(diarios, frente.id, data) ? 0 : (frente.avanco ?? 0)
 }
 
 // O próximo avanço já lançado para a frente DEPOIS da data (para o diário atrasado: o valor
@@ -140,10 +146,12 @@ export function diarioDoDia(diarios, data) {
 }
 
 // Formulário do dia: o diário que já existe (para editar) ou um em branco.
-// Cada frente vira uma linha; `marcada` diz se ela entra no diário.
+// Cada frente vira uma linha; `marcada` diz se ela entra no diário. Frente concluída depois
+// continua na linha do dia em que foi lançada (editar o dia não apaga o serviço).
 export function formularioDoDia(diarios, frentes, data) {
   const existente = diarioDoDia(diarios, data)
-  const servicos = frentesParaLancar(frentes).map((f) => {
+  const lancadaNoDia = (f) => existente?.servicos.some((x) => !x.fora_orcamento && x.frente_id === f.id)
+  const servicos = (frentes ?? []).filter((f) => f.status !== 'Concluída' || lancadaNoDia(f)).map((f) => {
     const s = existente?.servicos.find((x) => !x.fora_orcamento && x.frente_id === f.id)
     return {
       frente_id: f.id, marcada: !!s, avanco: s ? String(s.avanco) : String(ultimoAvanco(diarios, f, data)),
@@ -420,14 +428,15 @@ export function dataHoraPorExtenso(agora = new Date()) {
 }
 
 // Linhas da tabela "Serviços executados": as frentes (avanço no dia = acumulado − o último
-// lançado antes) e, no fim, as atividades fora do orçamento.
+// lançado antes; null no primeiro diário da frente, que não tem com o que comparar) e, no fim,
+// as atividades fora do orçamento.
 export function servicosDoRdo(diario, diarios, frentes) {
   const daFrente = diario.servicos.filter((s) => !s.fora_orcamento).map((s) => {
     const frente = (frentes ?? []).find((f) => f.id === s.frente_id)
-    const antes = frente ? ultimoAvanco((diarios ?? []).filter((d) => d.id !== diario.id), frente, diario.data) : 0
+    const antes = avancoAntes((diarios ?? []).filter((d) => d.id !== diario.id), s.frente_id, diario.data)
     return {
       fora: false, servico: frente?.servico ?? 'Frente', ambiente: frente?.ambiente ?? '', responsavel: frente?.responsavel ?? '',
-      noDia: Math.max(0, s.avanco - antes), acumulado: s.avanco, concluido: !!s.concluido, detalhe: s.detalhe ?? '',
+      noDia: antes == null ? null : Math.max(0, s.avanco - antes), acumulado: s.avanco, concluido: !!s.concluido, detalhe: s.detalhe ?? '',
     }
   })
   const foras = diario.servicos.filter((s) => s.fora_orcamento).map((s) => ({

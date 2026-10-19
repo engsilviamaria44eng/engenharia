@@ -59,7 +59,7 @@ function FolhaRdo({ f, comFotos }) {
                   <td>{s.servico}{s.fora && <em className="rdo-fora"> · fora do orçamento</em>}</td>
                   <td>{s.ambiente || '—'}</td>
                   <td>{s.responsavel || '—'}</td>
-                  <td className="num">{s.fora ? (s.quantidade || '—') : `${s.noDia}%`}</td>
+                  <td className="num">{s.fora ? (s.quantidade || '—') : (s.noDia == null ? '—' : `${s.noDia}%`)}</td>
                   <td className="num">{s.fora ? '—' : `${s.acumulado}%${s.concluido ? ' ✓' : ''}`}</td>
                   <td>{s.detalhe || '—'}</td>
                 </tr>

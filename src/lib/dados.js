@@ -491,7 +491,7 @@ export async function carregarFontesDoBI() {
       pedidos: pega(rp, 'materiais'), catalogo: pega(rcat, 'materiais'),
       pendencias: pega(rq, 'qualidade'), vistorias: fvs?.vistorias ?? null, ncs: fvs?.ncs ?? null, modelosFvs: fvs?.modelos ?? null,
       gemba: pega(rg, 'qualidade'),
-      diarios: null, // o módulo Diário de Obra ainda não existe
+      diarios: null, // entra na etapa 2 do BI (Ritmo e Produção), via listarDiarios
     },
     erros,
   })

@@ -6,6 +6,7 @@ import {
   CLIMAS, PERIODOS, ORIGENS_EQUIP, SITUACOES_EQUIP, alternarClima, numeroDoRdo, diaDaSemanaPorExtenso, funcoesDaObra,
   ehFuncaoNova, normalizarFuncao, totalDoEfetivo, marcarConcluido, mudarEfetivo, equipamentosDoDiaAnterior,
   equipamentoEmBranco, validarDiario, avancosMenores, montarDiario, formularioDoDia, ultimoAvanco, ehAtrasado, novaAtividadeFora, rotuloAnalise,
+  frentesParaLancar,
 } from '../lib/diario.js'
 import { formatarData, hojeISO } from '../lib/datas.js'
 import { Vazio } from '../components/index.jsx'
@@ -102,7 +103,7 @@ export default function LancarDia({ obra, frentes, diarios, usuario, data, onSal
   const atualizarServico = (novo) => setD({ ...d, servicos: d.servicos.map((s) => (s.frente_id === novo.frente_id ? novo : s)) })
   const mudarEquip = (i, campo, valor) => setD({ ...d, equipamentos: d.equipamentos.map((e, k) => (k === i ? { ...e, [campo]: valor } : e)) })
 
-  if (frentes.filter((f) => f.status !== 'Concluída').length === 0) {
+  if (frentesParaLancar(frentes).length === 0) {
     return <Vazio icone="hoje" titulo="Ainda não há frentes nesta obra" texto="Peça ao engenheiro para cadastrar as frentes. O diário lança o avanço de cada uma." />
   }
 

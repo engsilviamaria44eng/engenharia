@@ -185,5 +185,15 @@ conferir('folha em dia: sem rodapé de atraso', folha16.rodape, null)
 const folha30 = folhaDoRdo(je.find((d) => d.id === 'dr-16'), { obra: obraJe, diarios: je, frentes: frJe, geradoEm: 'x' })
 conferir('folha atrasada: rodapé com as duas datas', [folha30.numero, folha30.rodape], [122, 'Lançado em 18/10/2026 · referente a 30/09/2026'])
 
+// ---------- correções da revisão ----------
+const dr16 = je.find((d) => d.id === 'dr-16')
+const fPrimeira = frJe.find((f) => f.id === dr16.servicos.find((s) => !s.fora_orcamento).frente_id)
+conferir('diário atrasado antes do primeiro: parte de 0, não do avanço de hoje', ultimoAvanco(je, fPrimeira, '2026-09-29'), 0)
+conferir('sem diário nenhum da frente: vale o do cadastro', ultimoAvanco([], { id: 'f-x', avanco: 40 }, '2026-10-19'), 40)
+conferir('RDO do primeiro diário da frente: "no dia" fica sem número', servicosDoRdo(dr16, je, frJe).find((s) => !s.fora).noDia, null)
+const fr16Concluida = frJe.map((f) => (f.servico === sv16[0].servico ? { ...f, status: 'Concluída' } : f))
+const form16 = formularioDoDia(je, fr16Concluida, '2026-10-16')
+conferir('editar dia antigo: frente concluída depois continua marcada', form16.servicos.filter((s) => s.marcada).length, d16.servicos.filter((s) => !s.fora_orcamento).length)
+
 console.log(`${ok}/${tot} — diario`)
 if (ok !== tot) process.exit(1)
