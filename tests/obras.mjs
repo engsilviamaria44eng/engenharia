@@ -3,7 +3,8 @@
 import { escolherObraInicial, daObra, podeTrocarDeObra, chaveObraGuardada } from '../src/lib/obras.js'
 import { definirObraAtual, listarFrentes, listarObrasDoUsuario, listarPedidos, criarPedido, salvarPedido,
   listarAtividadesPlanejamento, criarAtividadePlanejamento, salvarAtividadesPlanejamento,
-  lerConfigPlanejamento, salvarConfigPlanejamento } from '../src/lib/dados.js'
+  lerConfigPlanejamento, salvarConfigPlanejamento,
+  listarMedicoesDaObra, criarContrato, salvarContrato, criarMedicao, salvarMedicao } from '../src/lib/dados.js'
 
 let ok = 0
 let tot = 0
@@ -91,6 +92,30 @@ definirObraAtual('obra-je')
 conferir('JE-01 guarda o próprio sábado', (await lerConfigPlanejamento()).data.dias_uteis, [1, 2, 3, 4, 5, 6])
 definirObraAtual(null)
 conferir('sem obra: configuração devolve erro', (await lerConfigPlanejamento()).data, null)
+
+// Medições: contratos, itens e boletins não vazam entre obras
+definirObraAtual('obra-je')
+const mje = (await listarMedicoesDaObra()).data
+const todosJE = [...mje.contratos, ...mje.itens, ...mje.medicoes]
+conferir('JE-01: só contratos, itens e boletins do Jardim Europa', todosJE.length > 0 && todosJE.every((x) => x.obra_id === 'obra-je'), true)
+definirObraAtual('obra-vn')
+const mvn = (await listarMedicoesDaObra()).data
+conferir('VN-02: só os 2 contratos da Vila Nova', mvn.contratos.map((x) => x.id), ['ct-06', 'ct-07'])
+const ctNovo = (await criarContrato({ empreiteiro: 'Teste', descricao: 'x', status: 'elaboracao', tipo: null, valor_global: null })).data
+conferir('contrato novo nasce na obra aberta', ctNovo.obra_id, 'obra-vn')
+conferir('salvar contrato de outra obra é recusado', (await salvarContrato({ ...mje.contratos[0], status: 'concluido' })).data, null)
+const comItens = (await salvarContrato({ ...ctNovo, tipo: 'escopo' }, [{ ordem: 1, descricao: 'Muro', unidade: 'm', quantidade: 10, preco_unitario: 5 }])).data
+conferir('itens do valor nascem na obra e no contrato certos', [comItens.itens[0].obra_id, comItens.itens[0].contrato_id], ['obra-vn', ctNovo.id])
+const bolVN = (await criarMedicao({ contrato_id: ctNovo.id, numero: 1, periodo_inicio: '2026-10-19', periodo_fim: '2026-10-19', status: 'rascunho', percentual: null, linhas: [] })).data
+conferir('boletim novo nasce na obra aberta', bolVN.obra_id, 'obra-vn')
+conferir('boletim em contrato de outra obra é recusado', (await criarMedicao({ contrato_id: 'ct-01', numero: 9, linhas: [] })).data, null)
+conferir('editar boletim de outra obra é recusado', (await salvarMedicao({ ...mje.medicoes.find((m) => m.status === 'rascunho'), percentual: 99 })).data, null)
+await salvarMedicao({ ...bolVN, status: 'fechada' })
+conferir('boletim fechado não muda mais', (await salvarMedicao({ ...bolVN, status: 'rascunho' })).erro, 'Este boletim já está fechado e não pode mudar.')
+definirObraAtual('obra-ca')
+conferir('Alphaville: nenhum contrato', (await listarMedicoesDaObra()).data.contratos, [])
+definirObraAtual(null)
+conferir('sem obra: contratos devolvem erro', (await listarMedicoesDaObra()).data, null)
 
 // Cada pessoa só vê as obras em que trabalha
 conferir('engenheiro vê as 3 obras', (await listarObrasDoUsuario('u-eng')).data.length, 3)

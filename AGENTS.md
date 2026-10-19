@@ -96,10 +96,16 @@ git e a Vercel publica sozinha. A pessoa não digita comando.
   em que foi aplicada (`AAAAMMDD-N-assunto.sql`).
 - **Provisórios do back-end:** membros, frentes e login ainda são mock, casados com o
   banco pelo `codigo` da obra; `pedidos_material.frente` é texto (vira `frente_id`).
-- **Planejamento (Last Planner) ainda é só mock**, sem tabela: `dados.js` guarda as atividades
-  em memória por obra (voltam ao exemplo ao recarregar). As 4 abas (EAP, longo, médio, curto)
-  usam UMA lista, no `PlanejamentoContext`; restrições e subtarefas ficam dentro da atividade.
+- **Planejamento (Last Planner) já está no banco:** `planejamento_atividades` (restrições e
+  subtarefas em jsonb, com CHECK dos tipos e causas) e `planejamento_config` (dias úteis por
+  obra; sem linha = padrão). Gravar várias atividades passa pela função
+  `salvar_atividades_planejamento(obra, lista)`: tudo junto ou nada, e recusa outra obra.
+  As 4 abas (EAP, longo, médio, curto) usam UMA lista, no `PlanejamentoContext`.
   Regras em `src/lib/planejamento.js` (testes em `tests/planejamento.mjs`).
+- **Medições de empreiteiros ainda são só mock** (sem tabela): contratos (Kanban com valor
+  global ou por escopo), itens do contrato e boletins, em memória por obra no `dados.js`.
+  Regras em `src/lib/medicoes.js` (quantidade é a fonte da verdade; nada passa de 100%
+  acumulado; boletim fechado não muda). Testes em `tests/medicoes.mjs`.
 - **No Windows, use `npm.cmd`** (e `npx.cmd`) se o PowerShell bloquear o `npm.ps1`.
   Nunca mude a política de execução do Windows por causa disso.
 - **O projeto está dentro do OneDrive.** A `node_modules` é recriável (`npm install`); se o

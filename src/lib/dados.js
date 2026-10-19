@@ -4,11 +4,14 @@
 // MULTI-OBRA: a camada guarda a obra atual e INJETA o obra_id em toda busca e gravação
 // de lançamento. As telas nunca passam obra_id — assim nenhuma consegue esquecer o filtro.
 //
-// BANCO x MOCK: com o .env.local presente (navegador), obras e Materiais vão ao Supabase.
-// Sem ele (testes em Node), tudo usa o mockData. Frentes e o login de demonstração ainda
-// são mock em qualquer caso, até os módulos deles irem para o banco.
+// BANCO x MOCK: com o .env.local presente (navegador), obras, Materiais e Planejamento vão
+// ao Supabase. Sem ele (testes em Node), tudo usa o mockData. Frentes, Medições e o login de
+// demonstração ainda são mock em qualquer caso, até os módulos deles irem para o banco.
 import { supabase } from './supabase.js'
-import { OBRAS, MEMBROS, FRENTES, USUARIOS, MATERIAIS_CATALOGO, PEDIDOS, ATIVIDADES_PLANEJAMENTO } from './mockData.js'
+import {
+  OBRAS, MEMBROS, FRENTES, USUARIOS, MATERIAIS_CATALOGO, PEDIDOS, ATIVIDADES_PLANEJAMENTO,
+  CONTRATOS, ITENS_CONTRATO, MEDICOES,
+} from './mockData.js'
 import { daObra } from './obras.js'
 import { CONFIG_PADRAO } from './planejamento.js'
 
@@ -80,53 +83,93 @@ export function listarFrentes() {
 }
 
 // ---------- planejamento (Last Planner) ----------
-// Ainda sem tabela no banco: em qualquer modo, usa o mock em memória da obra aberta
-// (casada pelo código, como as frentes). Volta ao exemplo ao recarregar a página.
+// Tabelas planejamento_atividades e planejamento_config. Restrições e subtarefas vão
+// dentro da atividade (jsonb). Mock em memória só nos testes (sem .env.local).
 const atividadesMock = ATIVIDADES_PLANEJAMENTO.map((a) => structuredClone(a))
 let proximaAtividadeMock = atividadesMock.length + 1
-const configMock = new Map() // id da obra (mock) -> dias úteis e feriados
+const configMock = new Map() // id da obra -> dias úteis e feriados (só no mock)
+const deOutraObraPlanejamento = { data: null, erro: 'Esta atividade não é da obra aberta. Recarregue a tela.' }
 
-function obraDoPlanejamento() {
-  return obraAtualId ? idMockDaObraAtual() : null
+// Tela -> banco: só os campos da atividade (sem id e sem obra_id; a camada põe a obra).
+function camposDaAtividade(a) {
+  return {
+    pai_id: a.pai_id ?? null, ordem: a.ordem, titulo: a.titulo, inicio: a.inicio, fim: a.fim,
+    progresso: a.progresso, status: a.status, subtarefas: a.subtarefas ?? [], restricoes: a.restricoes ?? [],
+    nao_realizado: a.nao_realizado ?? null, arquivada: !!a.arquivada,
+  }
 }
 
-export function listarAtividadesPlanejamento() {
+export async function listarAtividadesPlanejamento() {
   if (!obraAtualId) return semObra()
-  const obraId = obraDoPlanejamento()
-  if (!obraId) return Promise.resolve({ data: null, erro: 'Não foi possível achar o planejamento desta obra.' })
-  return resposta(structuredClone(daObra(atividadesMock, obraId)))
+  if (USAR_MOCK) return resposta(structuredClone(daObra(atividadesMock, obraAtualId)))
+  return doBanco(
+    supabase.from('planejamento_atividades')
+      .select('id, obra_id, pai_id, ordem, titulo, inicio, fim, progresso, status, subtarefas, restricoes, nao_realizado, arquivada')
+      .eq('obra_id', obraAtualId).order('ordem'),
+    'carregar o planejamento',
+  )
 }
 
 // A tela manda a atividade sem obra_id; a camada põe.
-export function criarAtividadePlanejamento(atividade) {
-  const obraId = obraDoPlanejamento()
-  if (!obraId) return semObra()
-  const nova = { ...structuredClone(atividade), id: `at-${String(proximaAtividadeMock++).padStart(2, '0')}`, obra_id: obraId }
-  atividadesMock.push(nova)
-  return resposta(structuredClone(nova))
+export async function criarAtividadePlanejamento(atividade) {
+  if (!obraAtualId) return semObra()
+  if (USAR_MOCK) {
+    const nova = { ...structuredClone(atividade), id: `at-${String(proximaAtividadeMock++).padStart(2, '0')}`, obra_id: obraAtualId }
+    atividadesMock.push(nova)
+    return resposta(structuredClone(nova))
+  }
+  return doBanco(
+    supabase.from('planejamento_atividades').insert({ ...camposDaAtividade(atividade), obra_id: obraAtualId })
+      .select('id, obra_id, pai_id, ordem, titulo, inicio, fim, progresso, status, subtarefas, restricoes, nao_realizado, arquivada')
+      .single(),
+    'criar a atividade',
+  )
 }
 
-// Grava uma ou várias atividades da obra aberta. Recusa tudo se alguma for de outra obra.
-export function salvarAtividadesPlanejamento(lista) {
-  const obraId = obraDoPlanejamento()
-  if (!obraId) return semObra()
-  const posicoes = lista.map((a) => atividadesMock.findIndex((x) => x.id === a.id && x.obra_id === obraId))
-  if (posicoes.some((i) => i < 0)) return Promise.resolve({ data: null, erro: 'Esta atividade não é da obra aberta. Recarregue a tela.' })
-  posicoes.forEach((i, k) => { atividadesMock[i] = { ...structuredClone(lista[k]), obra_id: obraId } })
-  return resposta(structuredClone(posicoes.map((i) => atividadesMock[i])))
+// Grava uma ou várias atividades da obra aberta, tudo junto ou nada (função do banco).
+// Recusa tudo se alguma for de outra obra.
+export async function salvarAtividadesPlanejamento(lista) {
+  if (!obraAtualId) return semObra()
+  if (USAR_MOCK) {
+    const posicoes = lista.map((a) => atividadesMock.findIndex((x) => x.id === a.id && x.obra_id === obraAtualId))
+    if (posicoes.some((i) => i < 0)) return deOutraObraPlanejamento
+    posicoes.forEach((i, k) => { atividadesMock[i] = { ...structuredClone(lista[k]), obra_id: obraAtualId } })
+    return resposta(structuredClone(posicoes.map((i) => atividadesMock[i])))
+  }
+  const r = await doBanco(
+    supabase.rpc('salvar_atividades_planejamento', {
+      p_obra: obraAtualId,
+      p_atividades: lista.map((a) => ({ id: a.id, ...camposDaAtividade(a) })),
+    }),
+    'salvar o planejamento',
+  )
+  if (r.erro && r.erro.includes('não é da obra aberta')) return deOutraObraPlanejamento
+  return r
 }
 
-export function lerConfigPlanejamento() {
-  const obraId = obraDoPlanejamento()
-  if (!obraId) return semObra()
-  return resposta(structuredClone(configMock.get(obraId) ?? CONFIG_PADRAO))
+// Sem linha no banco = o padrão (segunda a sexta e os feriados nacionais).
+export async function lerConfigPlanejamento() {
+  if (!obraAtualId) return semObra()
+  if (USAR_MOCK) return resposta(structuredClone(configMock.get(obraAtualId) ?? CONFIG_PADRAO))
+  const r = await doBanco(
+    supabase.from('planejamento_config').select('dias_uteis, feriados').eq('obra_id', obraAtualId).maybeSingle(),
+    'carregar os dias úteis',
+  )
+  return r.erro ? r : { data: r.data ?? structuredClone(CONFIG_PADRAO), erro: null }
 }
 
-export function salvarConfigPlanejamento(config) {
-  const obraId = obraDoPlanejamento()
-  if (!obraId) return semObra()
-  configMock.set(obraId, structuredClone(config))
-  return resposta(structuredClone(config))
+export async function salvarConfigPlanejamento(config) {
+  if (!obraAtualId) return semObra()
+  if (USAR_MOCK) {
+    configMock.set(obraAtualId, structuredClone(config))
+    return resposta(structuredClone(config))
+  }
+  return doBanco(
+    supabase.from('planejamento_config')
+      .upsert({ obra_id: obraAtualId, dias_uteis: config.dias_uteis, feriados: config.feriados }, { onConflict: 'obra_id' })
+      .select('dias_uteis, feriados').single(),
+    'salvar os dias úteis',
+  )
 }
 
 // ---------- materiais (Kanban de pedidos) ----------
@@ -212,4 +255,77 @@ export async function salvarPedido(pedido) {
   if (r.erro) return r
   if (!r.data || r.data.length === 0) return deOutraObra
   return { data: pedidoDoBanco(r.data[0]), erro: null }
+}
+
+// ---------- medições de empreiteiros ----------
+// Ainda sem tabela no banco: em qualquer modo, mock em memória da obra aberta (casada pelo
+// código, como as frentes). Volta ao exemplo ao recarregar a página.
+const contratosMock = CONTRATOS.map((c) => structuredClone(c))
+let itensContratoMock = ITENS_CONTRATO.map((i) => structuredClone(i))
+const medicoesMock = MEDICOES.map((m) => structuredClone(m))
+let proximoContratoMock = contratosMock.length + 1
+let proximoItemContratoMock = itensContratoMock.length + 1
+const deOutraObraContrato = { data: null, erro: 'Este contrato não é da obra aberta. Recarregue a tela.' }
+
+function obraDasMedicoes() {
+  return obraAtualId ? idMockDaObraAtual() : null
+}
+
+// Contratos, itens e boletins da obra aberta, numa leitura só.
+export function listarMedicoesDaObra() {
+  if (!obraAtualId) return semObra()
+  const obraId = obraDasMedicoes()
+  if (!obraId) return Promise.resolve({ data: null, erro: 'Não foi possível achar os contratos desta obra.' })
+  return resposta(structuredClone({
+    contratos: daObra(contratosMock, obraId),
+    itens: daObra(itensContratoMock, obraId),
+    medicoes: daObra(medicoesMock, obraId),
+  }))
+}
+
+// A tela manda o contrato sem obra_id; a camada põe.
+export function criarContrato(contrato) {
+  const obraId = obraDasMedicoes()
+  if (!obraId) return semObra()
+  const novo = { ...structuredClone(contrato), id: `ct-${String(proximoContratoMock++).padStart(2, '0')}`, obra_id: obraId }
+  contratosMock.push(novo)
+  return resposta(structuredClone(novo))
+}
+
+// Grava o contrato e, se vierem, troca os itens dele inteiros (cadastro do valor).
+export function salvarContrato(contrato, itens = null) {
+  const obraId = obraDasMedicoes()
+  if (!obraId) return semObra()
+  const i = contratosMock.findIndex((c) => c.id === contrato.id && c.obra_id === obraId)
+  if (i < 0) return Promise.resolve(deOutraObraContrato)
+  contratosMock[i] = { ...structuredClone(contrato), obra_id: obraId }
+  let novosItens = itensContratoMock.filter((it) => it.contrato_id === contrato.id)
+  if (itens) {
+    novosItens = itens.map((it) => ({ ...structuredClone(it), id: `ic-${String(proximoItemContratoMock++).padStart(2, '0')}`, obra_id: obraId, contrato_id: contrato.id }))
+    itensContratoMock = [...itensContratoMock.filter((it) => it.contrato_id !== contrato.id), ...novosItens]
+  }
+  return resposta(structuredClone({ contrato: contratosMock[i], itens: novosItens }))
+}
+
+let proximaMedicaoMock = medicoesMock.length + 1
+
+// Boletim novo do contrato (a tela manda sem obra_id; a camada põe). Recusa contrato de outra obra.
+export function criarMedicao(medicao) {
+  const obraId = obraDasMedicoes()
+  if (!obraId) return semObra()
+  if (!contratosMock.some((c) => c.id === medicao.contrato_id && c.obra_id === obraId)) return Promise.resolve(deOutraObraContrato)
+  const nova = { ...structuredClone(medicao), id: `md-${String(proximaMedicaoMock++).padStart(2, '0')}`, obra_id: obraId }
+  medicoesMock.push(nova)
+  return resposta(structuredClone(nova))
+}
+
+// Grava um boletim existente (editar o rascunho ou fechar). Boletim fechado não muda mais.
+export function salvarMedicao(medicao) {
+  const obraId = obraDasMedicoes()
+  if (!obraId) return semObra()
+  const i = medicoesMock.findIndex((m) => m.id === medicao.id && m.obra_id === obraId)
+  if (i < 0) return Promise.resolve({ data: null, erro: 'Este boletim não é da obra aberta. Recarregue a tela.' })
+  if (medicoesMock[i].status === 'fechada') return Promise.resolve({ data: null, erro: 'Este boletim já está fechado e não pode mudar.' })
+  medicoesMock[i] = { ...structuredClone(medicao), obra_id: obraId }
+  return resposta(structuredClone(medicoesMock[i]))
 }

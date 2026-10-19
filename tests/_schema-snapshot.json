@@ -34,5 +34,29 @@
                              "recebimento",
                              "created_at",
                              "updated_at"
-                         ]
+                         ],
+    "planejamento_atividades":  [
+                                    "id",
+                                    "obra_id",
+                                    "pai_id",
+                                    "ordem",
+                                    "titulo",
+                                    "inicio",
+                                    "fim",
+                                    "progresso",
+                                    "status",
+                                    "subtarefas",
+                                    "restricoes",
+                                    "nao_realizado",
+                                    "arquivada",
+                                    "created_at",
+                                    "updated_at"
+                                ],
+    "planejamento_config":  [
+                                "obra_id",
+                                "dias_uteis",
+                                "feriados",
+                                "created_at",
+                                "updated_at"
+                            ]
 }

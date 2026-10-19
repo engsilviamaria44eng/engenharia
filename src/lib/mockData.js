@@ -163,3 +163,37 @@ export const ATIVIDADES_PLANEJAMENTO = [
   atv({ id: 'at-16', obra_id: 'obra-vn', pai_id: 'at-14', ordem: 2, titulo: 'Muro de divisa', inicio: '2026-10-26', fim: '2026-11-13' }),
   atv({ id: 'at-17', obra_id: 'obra-vn', pai_id: null, ordem: 2, titulo: 'Contrapiso do térreo', inicio: '2026-10-13', fim: '2026-10-30', progresso: 70, status: 'em_andamento' }),
 ]
+
+// ---------- MEDIÇÕES DE EMPREITEIROS ----------
+// Contratos de empreiteiro por obra, espalhados pelas 4 colunas do Kanban.
+// JE-01: Gesso (GLOBAL, R$ 30.000, 1 boletim fechado de 25%), Drywall (POR ESCOPO, 3 itens =
+// R$ 30.000, 2 boletins: nº 1 fechado R$ 8.000 e nº 2 rascunho R$ 7.600 → 52% medido),
+// Alvenaria enviada para aprovação, Elétrica em elaboração e Fundação concluída (100%).
+// VN-02: poucos registros (muro por escopo, ativo e sem boletim; pintura em elaboração).
+// CA-03 (parada): nenhum contrato, para a tela vazia.
+export const CONTRATOS = [
+  { id: 'ct-01', obra_id: 'obra-je', empreiteiro: 'Gesso & Cia', descricao: 'Forro de gesso em placas e sancas', status: 'ativo', tipo: 'global', valor_global: 30000 },
+  { id: 'ct-02', obra_id: 'obra-je', empreiteiro: 'Drywall Forte', descricao: 'Paredes de drywall dos quartos', status: 'ativo', tipo: 'escopo', valor_global: null },
+  { id: 'ct-03', obra_id: 'obra-je', empreiteiro: 'Silva Alvenarias', descricao: 'Alvenaria do 2º pavimento', status: 'enviado', tipo: null, valor_global: null },
+  { id: 'ct-04', obra_id: 'obra-je', empreiteiro: 'Elétrica Luz Forte', descricao: 'Tubulação e fiação elétrica', status: 'elaboracao', tipo: null, valor_global: null },
+  { id: 'ct-05', obra_id: 'obra-je', empreiteiro: 'Construtora Pereira', descricao: 'Fundação (estacas e baldrame)', status: 'concluido', tipo: 'global', valor_global: 85000 },
+  { id: 'ct-06', obra_id: 'obra-vn', empreiteiro: 'Equipe Mendes', descricao: 'Muro de divisa', status: 'ativo', tipo: 'escopo', valor_global: null },
+  { id: 'ct-07', obra_id: 'obra-vn', empreiteiro: 'Pinturas Sol', descricao: 'Pintura externa', status: 'elaboracao', tipo: null, valor_global: null },
+]
+
+// Itens dos contratos POR ESCOPO.
+export const ITENS_CONTRATO = [
+  { id: 'ic-01', obra_id: 'obra-je', contrato_id: 'ct-02', ordem: 1, descricao: 'Placas de drywall (montagem)', unidade: 'm2', quantidade: 200, preco_unitario: 80 },
+  { id: 'ic-02', obra_id: 'obra-je', contrato_id: 'ct-02', ordem: 2, descricao: 'Tratamento de juntas', unidade: 'm2', quantidade: 200, preco_unitario: 40 },
+  { id: 'ic-03', obra_id: 'obra-je', contrato_id: 'ct-02', ordem: 3, descricao: 'Tabica de acabamento', unidade: 'm', quantidade: 50, preco_unitario: 120 },
+  { id: 'ic-04', obra_id: 'obra-vn', contrato_id: 'ct-06', ordem: 1, descricao: 'Muro em bloco de concreto, h = 2,20 m', unidade: 'm', quantidade: 45, preco_unitario: 180 },
+]
+
+// Boletins de medição (numerados por contrato). Global mede em %; por escopo, em quantidade.
+export const MEDICOES = [
+  { id: 'md-01', obra_id: 'obra-je', contrato_id: 'ct-01', numero: 1, periodo_inicio: '2026-10-05', periodo_fim: '2026-10-11', status: 'fechada', percentual: 25, linhas: [] },
+  { id: 'md-02', obra_id: 'obra-je', contrato_id: 'ct-02', numero: 1, periodo_inicio: '2026-09-28', periodo_fim: '2026-10-04', status: 'fechada', percentual: null, linhas: [{ item_id: 'ic-01', quantidade: 80 }, { item_id: 'ic-02', quantidade: 40 }, { item_id: 'ic-03', quantidade: 0 }] },
+  { id: 'md-03', obra_id: 'obra-je', contrato_id: 'ct-02', numero: 2, periodo_inicio: '2026-10-05', periodo_fim: '2026-10-18', status: 'rascunho', percentual: null, linhas: [{ item_id: 'ic-01', quantidade: 40 }, { item_id: 'ic-02', quantidade: 50 }, { item_id: 'ic-03', quantidade: 20 }] },
+  { id: 'md-04', obra_id: 'obra-je', contrato_id: 'ct-05', numero: 1, periodo_inicio: '2026-06-01', periodo_fim: '2026-06-30', status: 'fechada', percentual: 60, linhas: [] },
+  { id: 'md-05', obra_id: 'obra-je', contrato_id: 'ct-05', numero: 2, periodo_inicio: '2026-07-01', periodo_fim: '2026-07-17', status: 'fechada', percentual: 40, linhas: [] },
+]

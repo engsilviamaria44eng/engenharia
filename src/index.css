@@ -379,6 +379,54 @@ button:active{opacity:.82}
 .check input{width:22px;height:22px;margin:0 8px;accent-color:var(--pri);flex:none}
 .check .feita{text-decoration:line-through;color:var(--texto-2)}
 .check-acoes{display:flex;gap:6px}
+/* MEDIÇÕES: Kanban dos contratos e cadastro do valor */
+.stat .val.val-dinheiro{font-size:20px;line-height:1.3;overflow-wrap:anywhere}
+.escolha-tipo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.escolha-tipo button{min-height:64px;border:2px solid var(--linha);border-radius:var(--raio);background:#fff;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:8px 12px;text-align:left}
+.escolha-tipo button b{font-size:16px}
+.escolha-tipo button span{font-size:13px;color:var(--texto-2)}
+.escolha-tipo button.ativo{border-color:var(--pri);background:var(--pri-claro)}
+.escopo{display:flex;flex-direction:column;gap:8px}
+.escopo-linha{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;border:1px solid var(--linha);border-radius:var(--raio);padding:10px}
+.escopo-linha .escopo-desc{grid-column:1/-1}
+.escopo-linha .campo-rot{font-size:13px}
+.escopo-linha input,.escopo-linha select{min-height:44px}
+.escopo-sub{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;color:var(--texto-2)}
+.escopo-sub b{color:var(--texto)}
+@media (min-width:720px){
+  .escopo-linha{grid-template-columns:minmax(0,2.2fr) 0.8fr 1fr 1.1fr}
+  .escopo-linha .escopo-desc{grid-column:auto}
+}
+.total-contrato{display:flex;align-items:baseline;justify-content:space-between;gap:12px;background:var(--pri-claro);border-radius:var(--raio);padding:12px 14px}
+.total-contrato span{font-weight:600;color:var(--texto-2)}
+.total-contrato b{font-size:22px;color:var(--pri)}
+/* MEDIÇÕES: ficha e boletim */
+.voltar{align-self:flex-start;min-height:44px;padding:0 4px;color:var(--pri);font-weight:700;font-size:16px}
+.barra-ficha{max-width:none}
+.historico{list-style:none}
+.historico li{display:grid;gap:4px;padding:12px 16px;border-bottom:1px solid var(--linha)}
+.historico li:last-child{border-bottom:0}
+.hist-linha{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.hist-valor{font-size:20px;font-weight:700}
+.medir-itens{display:flex;flex-direction:column;gap:8px}
+.medir-item{border:1px solid var(--linha);border-left:5px solid var(--pri);border-radius:var(--raio);padding:10px 12px;display:grid;gap:8px}
+.medir-item.com-erro{border-left-color:var(--vermelho);background:var(--fundo-verm)}
+.medir-cab{display:grid;gap:2px}
+.medir-cab b{font-size:16px}
+.medir-cab span{font-size:13px;color:var(--texto-2)}
+.medir-campos{display:grid;grid-template-columns:1fr;gap:8px}
+@media (min-width:600px){ .medir-campos{grid-template-columns:repeat(3,1fr)} }
+.medir-acum{font-size:14px;color:var(--texto-2)}
+.medir-acum b{color:var(--texto)}
+.medir-acum.passou b{color:var(--verm-forte)}
+.campo-calc .campo-rot{font-size:13px}
+.com-sufixo{position:relative;display:block}
+.com-sufixo .sufixo{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--texto-2);font-weight:600;pointer-events:none}
+.campo-calc input{min-height:48px;border:2px solid var(--linha);border-radius:var(--raio);padding:8px 12px;font:inherit;background:#fff;color:var(--texto);width:100%}
+.campo-calc input:focus{outline:none;border-color:var(--pri)}
+.rodape-boletim{display:grid;gap:4px;background:var(--pri-claro);border-radius:var(--raio);padding:12px 14px;font-size:15px;color:var(--texto-2)}
+.rodape-boletim b{color:var(--texto)}
+.rodape-boletim span:first-child b{font-size:20px;color:var(--pri)}
 @media (max-width:380px){
   .stat .val{font-size:26px}
   .entrega .data{font-size:34px}
