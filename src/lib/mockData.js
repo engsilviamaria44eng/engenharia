@@ -197,3 +197,204 @@ export const MEDICOES = [
   { id: 'md-04', obra_id: 'obra-je', contrato_id: 'ct-05', numero: 1, periodo_inicio: '2026-06-01', periodo_fim: '2026-06-30', status: 'fechada', percentual: 60, linhas: [] },
   { id: 'md-05', obra_id: 'obra-je', contrato_id: 'ct-05', numero: 2, periodo_inicio: '2026-07-01', periodo_fim: '2026-07-17', status: 'fechada', percentual: 40, linhas: [] },
 ]
+
+// ---------- QUALIDADE: pendências (vistoria rápida) ----------
+// Hoje dos exemplos = 19/10/2026. JE-01: 6 pendências em 3 empresas, 1 vencida (#1, prazo
+// 15/10), 1 com prazo hoje (#5) e 1 resolvida com foto da correção (#4). VN-02: 2 registros.
+// CA-03 (parada): nenhuma, para a tela vazia. Fotos de exemplo em public/exemplos/.
+export const PENDENCIAS = [
+  { id: 'pq-01', obra_id: 'obra-je', numero: 1, descricao: 'Infiltração no forro do banheiro social, mancha de uns 40 cm perto do ralo do box.', local: 'Banheiro social', pavimento: '2º pavimento', empresa: 'Hidráulica Fluxo', prazo: '2026-10-15', responsavel: 'Mestre Ricardo', data_vistoria: '2026-10-08', vistoriado_por: 'Engenheiro', status: 'pendente', foto: '/exemplos/infiltracao.svg', foto_evidencia: null, data_resolucao: null, observacoes: '[14/10/2026 16:40] Mestre Ricardo: Empresa pediu para voltar na sexta.\n[08/10/2026 09:12] Engenheiro: Vistoria inicial: mancha de 40 cm no forro.' },
+  { id: 'pq-02', obra_id: 'obra-je', numero: 2, descricao: 'Trinca diagonal na alvenaria da suíte, saindo do canto da janela.', local: 'Suíte 1', pavimento: '2º pavimento', empresa: 'Silva Alvenarias', prazo: '2026-10-23', responsavel: 'Engenheiro', data_vistoria: '2026-10-13', vistoriado_por: 'Engenheiro', status: 'em_andamento', foto: '/exemplos/trinca.svg', foto_evidencia: null, data_resolucao: null, observacoes: '[16/10/2026 10:05] Engenheiro: Colocada em andamento.\n[13/10/2026 11:30] Engenheiro: Colocar tela na verga e refazer o reboco.' },
+  { id: 'pq-03', obra_id: 'obra-je', numero: 3, descricao: 'Parede da sala fora de prumo (2 cm em 2,80 m).', local: 'Sala', pavimento: 'Térreo', empresa: 'Silva Alvenarias', prazo: '2026-10-30', responsavel: 'Mestre Ricardo', data_vistoria: '2026-10-16', vistoriado_por: 'Mestre Ricardo', status: 'pendente', foto: '/exemplos/prumo.svg', foto_evidencia: null, data_resolucao: null, observacoes: '' },
+  { id: 'pq-04', obra_id: 'obra-je', numero: 4, descricao: 'Caixa 4x2 da bancada desalinhada com a do lado.', local: 'Cozinha', pavimento: 'Térreo', empresa: 'Elétrica Luz Forte', prazo: '2026-10-20', responsavel: 'Engenheiro', data_vistoria: '2026-10-10', vistoriado_por: 'Engenheiro', status: 'resolvido', foto: '/exemplos/caixa.svg', foto_evidencia: '/exemplos/caixa-corrigida.svg', data_resolucao: '2026-10-17', observacoes: '[17/10/2026 15:20] Engenheiro: Resolvida, com foto da correção.\n[14/10/2026 08:45] Engenheiro: Colocada em andamento.' },
+  { id: 'pq-05', obra_id: 'obra-je', numero: 5, descricao: 'Respingo de concreto na esquadria de alumínio da fachada.', local: 'Fachada frontal', pavimento: '1º pavimento', empresa: 'Construtora Pereira', prazo: '2026-10-19', responsavel: 'Mestre Ricardo', data_vistoria: '2026-10-17', vistoriado_por: 'Engenheiro', status: 'pendente', foto: '/exemplos/respingo.svg', foto_evidencia: null, data_resolucao: null, observacoes: '' },
+  { id: 'pq-06', obra_id: 'obra-je', numero: 6, descricao: 'Eletroduto amassado na laje antes da concretagem.', local: 'Laje', pavimento: '2º pavimento', empresa: 'Elétrica Luz Forte', prazo: '2026-10-24', responsavel: 'Mestre Ricardo', data_vistoria: '2026-10-18', vistoriado_por: 'Mestre Ricardo', status: 'em_andamento', foto: '/exemplos/eletroduto.svg', foto_evidencia: null, data_resolucao: null, observacoes: '[18/10/2026 17:10] Mestre Ricardo: Colocada em andamento.' },
+  { id: 'pq-07', obra_id: 'obra-vn', numero: 1, descricao: 'Bloco quebrado na 3ª fiada do muro de divisa.', local: 'Área externa', pavimento: '', empresa: 'Equipe Mendes', prazo: '2026-10-28', responsavel: 'Mestre Marcos', data_vistoria: '2026-10-16', vistoriado_por: 'Mestre Marcos', status: 'pendente', foto: '/exemplos/muro.svg', foto_evidencia: null, data_resolucao: null, observacoes: '' },
+  { id: 'pq-08', obra_id: 'obra-vn', numero: 2, descricao: 'Contrapiso com desnível na porta da cozinha.', local: 'Cozinha', pavimento: 'Térreo', empresa: 'Equipe própria', prazo: '2026-10-22', responsavel: 'Engenheiro', data_vistoria: '2026-10-14', vistoriado_por: 'Engenheiro', status: 'em_andamento', foto: null, foto_evidencia: null, data_resolucao: null, observacoes: '' },
+]
+
+// ---------- QUALIDADE: FVS (Ficha de Verificação de Serviço) ----------
+// Modelos da empresa (valem para todas as obras).
+export const MODELOS_FVS = [
+  {
+    id: 'mf-01', codigo: 'FVS-01', nome: 'Impermeabilização — Áreas Molhadas', categoria: 'Impermeabilização', versao: 2,
+    grupos: [
+      { nome: 'Pré-execução', itens: [
+        { id: 'f1-01', titulo: 'Superfície limpa, seca e sem partes soltas' },
+        { id: 'f1-02', titulo: 'Cantos e arestas arredondados (meia-cana)' },
+        { id: 'f1-03', titulo: 'Ralos e tubos passantes chumbados e reforçados' },
+      ] },
+      { nome: 'Execução', itens: [
+        { id: 'f1-04', titulo: 'Primer aplicado em toda a área' },
+        { id: 'f1-05', titulo: 'Demãos conforme especificação (mínimo 3, cruzadas)' },
+        { id: 'f1-06', titulo: 'Tela de reforço nos ralos, cantos e juntas' },
+        { id: 'f1-07', titulo: 'Subida de 30 cm nas paredes (no box, 1,80 m)' },
+      ] },
+      { nome: 'Proteção e acabamento', itens: [
+        { id: 'f1-08', titulo: 'Teste de estanqueidade de 72 h sem vazamento' },
+        { id: 'f1-09', titulo: 'Proteção mecânica executada' },
+        { id: 'f1-10', titulo: 'Registro fotográfico antes da proteção' },
+      ] },
+    ],
+  },
+  {
+    id: 'mf-02', codigo: 'FVS-02', nome: 'Revestimento Cerâmico', categoria: 'Acabamento', versao: 1,
+    grupos: [
+      { nome: 'Execução', itens: [
+        { id: 'f2-01', titulo: 'Base regularizada, no prumo e no nível' },
+        { id: 'f2-02', titulo: 'Argamassa colante do tipo especificado (AC-II / AC-III)' },
+        { id: 'f2-03', titulo: 'Dupla colagem em peças maiores que 30×30 cm' },
+        { id: 'f2-04', titulo: 'Juntas com espaçador, alinhadas e no prumo' },
+        { id: 'f2-05', titulo: 'Caimento para o ralo conferido' },
+      ] },
+      { nome: 'Proteção e acabamento', itens: [
+        { id: 'f2-06', titulo: 'Rejunte completo e limpo' },
+        { id: 'f2-07', titulo: 'Teste de percussão sem peças ocas' },
+        { id: 'f2-08', titulo: 'Peças sem trincas, lascas ou manchas' },
+      ] },
+    ],
+  },
+]
+
+const gruposDe = (id) => structuredClone(MODELOS_FVS.find((m) => m.id === id).grupos)
+
+// JE-01: 1 vistoria concluída (impermeabilização do banheiro, 7 OK, 2 NC, 1 N.A. = 78%) e
+// 1 em andamento (cerâmica da cozinha, 4 de 8 verificados). VN-02: 1 em andamento.
+export const VISTORIAS_FVS = [
+  {
+    id: 'vf-01', obra_id: 'obra-je', modelo_id: 'mf-01', modelo_codigo: 'FVS-01', modelo_nome: 'Impermeabilização — Áreas Molhadas', modelo_versao: 2,
+    ambiente: 'Banheiro social · 2º pavimento', data: '2026-10-14', vistoriado_por: 'Engenheiro', status: 'concluida', concluida_em: '2026-10-14',
+    grupos: gruposDe('mf-01'),
+    respostas: { 'f1-01': 'ok', 'f1-02': 'ok', 'f1-03': 'ok', 'f1-04': 'ok', 'f1-05': 'ok', 'f1-06': 'ok', 'f1-07': 'nc', 'f1-08': 'nc', 'f1-09': 'ok', 'f1-10': 'na' },
+  },
+  {
+    id: 'vf-02', obra_id: 'obra-je', modelo_id: 'mf-02', modelo_codigo: 'FVS-02', modelo_nome: 'Revestimento Cerâmico', modelo_versao: 1,
+    ambiente: 'Cozinha · Térreo', data: '2026-10-18', vistoriado_por: 'Mestre Ricardo', status: 'em_andamento', concluida_em: null,
+    grupos: gruposDe('mf-02'),
+    respostas: { 'f2-01': 'ok', 'f2-02': 'ok', 'f2-03': 'nc', 'f2-04': 'ok' },
+  },
+  {
+    id: 'vf-03', obra_id: 'obra-vn', modelo_id: 'mf-01', modelo_codigo: 'FVS-01', modelo_nome: 'Impermeabilização — Áreas Molhadas', modelo_versao: 2,
+    ambiente: 'Banheiro · Pavimento superior', data: '2026-10-17', vistoriado_por: 'Engenheiro', status: 'em_andamento', concluida_em: null,
+    grupos: gruposDe('mf-01'),
+    respostas: { 'f1-01': 'nc', 'f1-02': 'ok' },
+  },
+]
+
+// Não conformidades em status variados, cada uma com a timeline do que aconteceu.
+export const NAO_CONFORMIDADES = [
+  {
+    id: 'nc-01', obra_id: 'obra-je', codigo: 'NC-001', vistoria_id: 'vf-01', item_id: 'f1-08', item_numero: '3.1', item_titulo: 'Teste de estanqueidade de 72 h sem vazamento',
+    titulo: 'Vazamento no teste de estanqueidade', servico: 'Impermeabilização — Áreas Molhadas', ambiente: 'Banheiro social · 2º pavimento',
+    descricao: 'Vazamento no teste de estanqueidade: mancha no forro do pavimento de baixo depois de 48 h.', solucao: 'Refazer a manta no entorno do ralo e repetir o teste de 72 h.',
+    severidade: 'alta', responsavel: 'Impermeabiliza Já', fotos: ['/exemplos/infiltracao.svg'], status: 'corrigida', aberta_em: '2026-10-14', fechada_em: null,
+    timeline: [
+      { data: '2026-10-14', hora: '15:02', texto: 'Aberta por Engenheiro na vistoria (item 3.1).' },
+      { data: '2026-10-14', hora: '15:30', texto: 'Encaminhada a Impermeabiliza Já por Engenheiro.' },
+      { data: '2026-10-17', hora: '11:00', texto: 'Marcada como corrigida por Mestre Ricardo.' },
+    ],
+  },
+  {
+    id: 'nc-02', obra_id: 'obra-je', codigo: 'NC-002', vistoria_id: 'vf-02', item_id: 'f2-03', item_numero: '1.3', item_titulo: 'Dupla colagem em peças maiores que 30×30 cm',
+    titulo: 'Peças 60×60 assentadas sem dupla colagem', servico: 'Revestimento Cerâmico', ambiente: 'Cozinha · Térreo',
+    descricao: 'Peças 60×60 assentadas sem dupla colagem na faixa da bancada.', solucao: 'Remover as peças da faixa e reassentar com dupla colagem.',
+    severidade: 'media', responsavel: 'Revest Pisos', fotos: [], status: 'encaminhada', aberta_em: '2026-10-18', fechada_em: null,
+    timeline: [
+      { data: '2026-10-18', hora: '10:12', texto: 'Aberta por Mestre Ricardo na vistoria (item 1.3).' },
+      { data: '2026-10-18', hora: '10:40', texto: 'Encaminhada a Revest Pisos por Engenheiro.' },
+    ],
+  },
+  {
+    id: 'nc-03', obra_id: 'obra-je', codigo: 'NC-003', vistoria_id: 'vf-01', item_id: 'f1-07', item_numero: '2.4', item_titulo: 'Subida de 30 cm nas paredes (no box, 1,80 m)',
+    titulo: 'Subida no box abaixo de 1,80 m', servico: 'Impermeabilização — Áreas Molhadas', ambiente: 'Banheiro social · 2º pavimento',
+    descricao: 'Subida da impermeabilização no box com 1,40 m. Especificado: 1,80 m.', solucao: 'Completar a subida até 1,80 m antes do revestimento.',
+    severidade: 'baixa', responsavel: 'Impermeabiliza Já', fotos: [], status: 'fechada', aberta_em: '2026-10-14', fechada_em: '2026-10-16',
+    timeline: [
+      { data: '2026-10-14', hora: '15:05', texto: 'Aberta por Engenheiro na vistoria (item 2.4).' },
+      { data: '2026-10-14', hora: '15:31', texto: 'Encaminhada a Impermeabiliza Já por Engenheiro.' },
+      { data: '2026-10-15', hora: '09:20', texto: 'Marcada como corrigida por Mestre Ricardo.' },
+      { data: '2026-10-15', hora: '16:45', texto: 'Reprovada na reavaliação por Engenheiro: ainda com 1,60 m no canto. Volta para correção.' },
+      { data: '2026-10-16', hora: '10:10', texto: 'Marcada como corrigida por Mestre Ricardo.' },
+      { data: '2026-10-16', hora: '14:20', texto: 'Aprovada e fechada por Engenheiro.' },
+    ],
+  },
+  {
+    id: 'nc-04', obra_id: 'obra-vn', codigo: 'NC-001', vistoria_id: 'vf-03', item_id: 'f1-01', item_numero: '1.1', item_titulo: 'Superfície limpa, seca e sem partes soltas',
+    titulo: 'Contrapiso com pó e partes soltas', servico: 'Impermeabilização — Áreas Molhadas', ambiente: 'Banheiro · Pavimento superior',
+    descricao: 'Contrapiso com pó e partes soltas perto da porta.', solucao: 'Lixar, limpar e aplicar o primer só depois.',
+    severidade: 'media', responsavel: 'Equipe Mendes', fotos: [], status: 'aberta', aberta_em: '2026-10-17', fechada_em: null,
+    timeline: [{ data: '2026-10-17', hora: '08:50', texto: 'Aberta por Engenheiro na vistoria (item 1.1).' }],
+  },
+]
+
+// ---------- QUALIDADE: Gemba Walk (observações de desperdício) ----------
+// JE-01: 8 observações cobrindo os 7 tipos (1 vencida, 1 com prazo hoje, 1 sem prazo,
+// 2 resolvidas). VN-02: 2 observações. CA-03: nenhuma.
+export const GEMBA_OBSERVACOES = [
+  { id: 'gb-01', obra_id: 'obra-je', data: '2026-10-15', registrado_por: 'Engenheiro', local: 'Cozinha · Térreo', descricao: 'Reboco da parede da pia refeito: saiu fora de prumo.', causa_raiz: 'Taliscas não conferidas antes de liberar o reboco.', acao: 'Mestre confere as taliscas antes de cada pano de reboco.', desperdicios: ['Retrabalho'], prazo: '2026-10-22', responsavel: 'Mestre Ricardo', status: 'em_andamento', foto: '/exemplos/prumo.svg' },
+  { id: 'gb-02', obra_id: 'obra-je', data: '2026-10-13', registrado_por: 'Mestre Ricardo', local: 'Portão de entrada', descricao: 'Equipe de reboco parada 2 h esperando o caminhão de areia.', causa_raiz: 'Pedido feito no mesmo dia, sem horário combinado.', acao: 'Agendar toda entrega com 48 h e horário marcado.', desperdicios: ['Espera'], prazo: '2026-10-17', responsavel: 'Compras', status: 'pendente', foto: null },
+  { id: 'gb-03', obra_id: 'obra-je', data: '2026-10-16', registrado_por: 'Engenheiro', local: 'Pátio de descarga', descricao: 'Blocos descarregados longe do guincho e levados no braço até o 2º pavimento.', causa_raiz: 'Não há área de descarga definida.', acao: 'Marcar a área de descarga ao lado do guincho.', desperdicios: ['Transporte', 'Movimentação'], prazo: '2026-10-24', responsavel: 'Mestre Ricardo', status: 'pendente', foto: null },
+  { id: 'gb-04', obra_id: 'obra-je', data: '2026-10-14', registrado_por: 'Engenheiro', local: 'Almoxarifado', descricao: '40 sacos de cimento perto do vencimento, empilhados no fundo.', causa_raiz: 'Compra acima do consumo semanal.', acao: 'Comprar por semana, pelo planejamento de curto prazo.', desperdicios: ['Estoque'], prazo: '2026-10-25', responsavel: 'Engenheiro', status: 'em_andamento', foto: null },
+  { id: 'gb-05', obra_id: 'obra-je', data: '2026-10-17', registrado_por: 'Mestre Ricardo', local: '2º pavimento', descricao: 'Argamassa preparada demais e jogada fora no fim do dia.', causa_raiz: 'Betoneira cheia no fim do turno sem saber quanto falta.', acao: 'Meia betonada depois das 15 h.', desperdicios: ['Superprodução'], prazo: null, responsavel: 'Mestre Ricardo', status: 'pendente', foto: null },
+  { id: 'gb-06', obra_id: 'obra-je', data: '2026-10-08', registrado_por: 'Engenheiro', local: 'Portaria', descricao: 'Material conferido duas vezes: na portaria e de novo no almoxarifado.', causa_raiz: 'Ninguém sabia quem era o responsável pela conferência.', acao: 'Conferir só no almoxarifado, com a nota fiscal.', desperdicios: ['Processo desnecessário'], prazo: '2026-10-15', responsavel: 'Engenheiro', status: 'resolvido', foto: null },
+  { id: 'gb-07', obra_id: 'obra-je', data: '2026-10-18', registrado_por: 'Engenheiro', local: '2º pavimento', descricao: 'Pedreiro desce 3 vezes por hora para buscar ferramenta no térreo.', causa_raiz: 'Ferramentas guardadas só no térreo.', acao: 'Uma caixa de ferramentas por pavimento.', desperdicios: ['Movimentação'], prazo: '2026-10-19', responsavel: 'Mestre Ricardo', status: 'em_andamento', foto: null },
+  { id: 'gb-08', obra_id: 'obra-je', data: '2026-10-06', registrado_por: 'Engenheiro', local: 'Sala · Térreo', descricao: 'Fiação passada antes da tubulação ser conferida; foi puxada de novo.', causa_raiz: 'Etapa de conferência da tubulação pulada.', acao: 'Liberar fiação só com a tubulação conferida na FVS.', desperdicios: ['Retrabalho', 'Espera'], prazo: '2026-10-12', responsavel: 'Elétrica Luz Forte', status: 'resolvido', foto: '/exemplos/eletroduto.svg' },
+  { id: 'gb-09', obra_id: 'obra-vn', data: '2026-10-16', registrado_por: 'Mestre Marcos', local: 'Laje do térreo', descricao: 'Concreto chegou 1 h atrasado e a equipe ficou parada.', causa_raiz: 'Usina sem confirmação na véspera.', acao: 'Confirmar a usina na véspera, às 16 h.', desperdicios: ['Espera'], prazo: '2026-10-23', responsavel: 'Engenheiro', status: 'pendente', foto: null },
+  { id: 'gb-10', obra_id: 'obra-vn', data: '2026-10-10', registrado_por: 'Engenheiro', local: 'Área externa', descricao: 'Blocos do muro levados de carrinho de um lado a outro do terreno.', causa_raiz: 'Descarga no lado oposto ao muro.', acao: 'Descarregar junto ao muro.', desperdicios: ['Transporte'], prazo: '2026-10-14', responsavel: 'Mestre Marcos', status: 'resolvido', foto: '/exemplos/muro.svg' },
+]
+
+// ---------- DIÁRIO DE OBRA (RDO) ----------
+// Um diário por obra e por dia. Os avanços batem com as frentes acima (alvenaria parou em
+// 14/10, laje em 02/10, elétrica andou em 16/10, reboco em 17/10). 12/10 é feriado: sem diário.
+// JE-01: 13 dias com clima variado (chuva em 06, 07 e 15/10), 2 ocorrências e 2 fotos.
+// VN-02: 2 dias. CA-03: nenhum. Um diário passado a limpo depois (30/09, lançado em 18/10) e\n// 2 atividades fora do orçamento (uma para analisar, uma já marcada como serviço extra).
+const sv = (frente_id, avanco, efetivo, detalhe = '') => ({ frente_id, avanco, concluido: avanco === 100, detalhe, efetivo })
+const equipJE = (betoneira = 'Em uso') => [
+  { nome: 'Betoneira 400 L', quantidade: 1, origem: 'Próprio', situacao: betoneira },
+  { nome: 'Andaime (módulos)', quantidade: 20, origem: 'Alugado', situacao: 'Em uso' },
+  { nome: 'Serra circular', quantidade: 1, origem: 'Próprio', situacao: 'Em uso' },
+]
+// O efetivo é do dia: soma o que cada serviço trouxe e guarda só no diário.
+const somaEfetivo = (servicos) => servicos.reduce((tot, s) => { for (const [f, q] of Object.entries(s.efetivo ?? {})) tot[f] = (tot[f] ?? 0) + q; return tot }, {})
+const semEfetivo = (servicos) => servicos.map((s) => { const c = { ...s }; delete c.efetivo; return c })
+const rdo = (id, obra_id, data, [manha, tarde, noite], servicos, extra = {}) => ({
+  id, obra_id, data, clima: { manha, tarde, noite }, efetivo: somaEfetivo(servicos), servicos: semEfetivo(servicos), fotos: [], equipamentos: equipJE(), ocorrencias: '',
+  lancado_por: obra_id === 'obra-je' ? 'Ricardo Alves' : 'Marcos Dias', lancado_em: data, ...extra,
+})
+const alv = { Pedreiro: 3, Servente: 2 }
+const alv4 = { Pedreiro: 4, Servente: 2 }
+const ele = { Eletricista: 2 }
+const laje = { Carpinteiro: 2, Armador: 2, Servente: 1 }
+const reb = { Pedreiro: 2, Servente: 2 }
+export const DIARIOS = [
+  // passado a limpo depois (diário atrasado): lançado em 18/10 pelo engenheiro
+  rdo('dr-16', 'obra-je', '2026-09-30', ['sol', 'sol', null], [sv('f-alv', 28, alv)], { lancado_por: 'Engenheiro', lancado_em: '2026-10-18' }),
+  rdo('dr-01', 'obra-je', '2026-10-01', ['sol', 'sol', null], [sv('f-alv', 30, alv), sv('f-eletr', 5, ele), sv('f-laje', 38, laje)]),
+  rdo('dr-02', 'obra-je', '2026-10-02', ['sol', 'nublado', null], [sv('f-alv', 33, alv), sv('f-laje', 40, laje, 'Fôrmas e escoramento concluídos')]),
+  rdo('dr-03', 'obra-je', '2026-10-03', ['nublado', 'nublado', null], [sv('f-alv', 35, { Pedreiro: 2, Servente: 1 })]),
+  rdo('dr-04', 'obra-je', '2026-10-05', ['sol', 'sol', 'sol'], [sv('f-alv', 38, alv), sv('f-eletr', 8, ele)]),
+  rdo('dr-05', 'obra-je', '2026-10-06', ['chuva', 'nublado', 'chuva'], [sv('f-alv', 40, { Pedreiro: 2, Servente: 1 })]),
+  rdo('dr-06', 'obra-je', '2026-10-07', ['chuva', 'chuva_forte', 'chuva'], [sv('f-alv', 40, { Pedreiro: 1 }, 'Só limpeza e marcação, por causa da chuva')], {
+    equipamentos: equipJE('Parado'), ocorrencias: 'Chuva forte à tarde: serviço externo parado às 14h e equipe liberada às 15h.',
+  }),
+  rdo('dr-07', 'obra-je', '2026-10-08', ['nublado', 'sol', null], [sv('f-alv', 44, alv4), sv('f-eletr', 12, ele)]),
+  rdo('dr-08', 'obra-je', '2026-10-09', ['sol', 'sol', null], [sv('f-alv', 48, alv4), sv('f-eletr', 15, ele)]),
+  rdo('dr-09', 'obra-je', '2026-10-13', ['sol', 'nublado', null], [sv('f-alv', 52, alv4), sv('f-eletr', 18, ele),
+    { id: 'fo-01', fora_orcamento: true, frente_id: null, descricao: 'Demolição de mureta não prevista no quintal', ambiente: 'Quintal', quantidade: 4, unidade: 'm', efetivo: { Servente: 2 }, analise: 'para_analisar', frente_ligada: null }]),
+  rdo('dr-10', 'obra-je', '2026-10-14', ['sol', 'sol', 'nublado'], [sv('f-alv', 60, alv4, 'Fechamento da suíte 1 até o respaldo')], {
+    fotos: [{ id: 'ft-01', url: '/exemplos/prumo.svg', frente_id: 'f-alv', ambiente: 'Suíte 1', cliente_ve: true }],
+  }),
+  rdo('dr-11', 'obra-je', '2026-10-15', ['nublado', 'chuva', 'chuva'], [sv('f-eletr', 22, ele), sv('f-reb', 4, reb),
+    { id: 'fo-02', fora_orcamento: true, frente_id: null, descricao: 'Retirada de entulho do terreno vizinho (pedido do cliente)', ambiente: 'Área externa', quantidade: null, unidade: '', efetivo: { Servente: 1 }, analise: 'extra', frente_ligada: null }]),
+  rdo('dr-12', 'obra-je', '2026-10-16', ['sol', 'sol', null], [sv('f-eletr', 25, { Eletricista: 2, 'Ajudante de elétrica': 1 }), sv('f-reb', 7, reb)], {
+    ocorrencias: 'Vergalhão não chegou: a armação da laje continua parada.',
+    fotos: [{ id: 'ft-02', url: '/exemplos/eletroduto.svg', frente_id: 'f-eletr', ambiente: 'Sala', cliente_ve: false }],
+  }),
+  rdo('dr-13', 'obra-je', '2026-10-17', ['sol', 'nublado', null], [sv('f-reb', 10, reb)]),
+  rdo('dr-14', 'obra-vn', '2026-10-16', ['sol', 'sol', null], [sv('f-alv2', 82, { Pedreiro: 2, Servente: 1 }), sv('f-contra', 65, { Pedreiro: 1, Servente: 2 })], {
+    equipamentos: [{ nome: 'Betoneira 400 L', quantidade: 1, origem: 'Próprio', situacao: 'Em uso' }],
+  }),
+  rdo('dr-15', 'obra-vn', '2026-10-17', ['sol', 'sol', null], [sv('f-alv2', 85, { Pedreiro: 2, Servente: 1 }), sv('f-contra', 70, { Pedreiro: 1, Servente: 2 })], {
+    equipamentos: [{ nome: 'Betoneira 400 L', quantidade: 1, origem: 'Próprio', situacao: 'Em uso' }],
+  }),
+]

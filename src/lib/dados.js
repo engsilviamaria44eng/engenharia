@@ -10,7 +10,8 @@
 import { supabase } from './supabase.js'
 import {
   OBRAS, MEMBROS, FRENTES, USUARIOS, MATERIAIS_CATALOGO, PEDIDOS, ATIVIDADES_PLANEJAMENTO,
-  CONTRATOS, ITENS_CONTRATO, MEDICOES,
+  CONTRATOS, ITENS_CONTRATO, MEDICOES, PENDENCIAS, MODELOS_FVS, VISTORIAS_FVS, NAO_CONFORMIDADES,
+  GEMBA_OBSERVACOES, DIARIOS,
 } from './mockData.js'
 import { daObra } from './obras.js'
 import { CONFIG_PADRAO } from './planejamento.js'
@@ -337,4 +338,189 @@ export function salvarMedicao(medicao) {
   if (contratosMock.find((c) => c.id === medicao.contrato_id)?.status !== 'ativo') return Promise.resolve(soContratoAtivo)
   medicoesMock[i] = { ...structuredClone(medicao), obra_id: obraId }
   return resposta(structuredClone(medicoesMock[i]))
+}
+// ---------- qualidade: pendências ----------
+// Ainda sem tabela no banco: mock em memória da obra aberta (casada pelo código).
+const pendenciasMock = PENDENCIAS.map((p) => structuredClone(p))
+let proximaPendenciaMock = pendenciasMock.length + 1
+
+function obraDaQualidade() {
+  return obraAtualId ? idMockDaObraAtual() : null
+}
+
+export function listarPendencias() {
+  if (!obraAtualId) return semObra()
+  const obraId = obraDaQualidade()
+  if (!obraId) return Promise.resolve({ data: null, erro: 'Não foi possível achar as pendências desta obra.' })
+  return resposta(structuredClone(daObra(pendenciasMock, obraId)))
+}
+
+// A tela manda sem obra_id e sem número; a camada põe a obra e o próximo número DA OBRA.
+export function criarPendencia(pendencia) {
+  const obraId = obraDaQualidade()
+  if (!obraId) return semObra()
+  const numero = daObra(pendenciasMock, obraId).reduce((n, p) => Math.max(n, p.numero), 0) + 1
+  const nova = { ...structuredClone(pendencia), id: `pq-${String(proximaPendenciaMock++).padStart(2, '0')}`, obra_id: obraId, numero }
+  pendenciasMock.push(nova)
+  return resposta(structuredClone(nova))
+}
+
+export function salvarPendencia(pendencia) {
+  const obraId = obraDaQualidade()
+  if (!obraId) return semObra()
+  const i = pendenciasMock.findIndex((p) => p.id === pendencia.id && p.obra_id === obraId)
+  if (i < 0) return Promise.resolve({ data: null, erro: 'Esta pendência não é da obra aberta. Recarregue a tela.' })
+  pendenciasMock[i] = { ...structuredClone(pendencia), obra_id: obraId, numero: pendenciasMock[i].numero }
+  return resposta(structuredClone(pendenciasMock[i]))
+}
+
+// ---------- qualidade: FVS (modelos, vistorias e não conformidades) ----------
+// Modelos são da empresa (todas as obras). Vistorias e NCs são da obra aberta.
+let modelosFvsMock = MODELOS_FVS.map((m) => structuredClone(m))
+const vistoriasMock = VISTORIAS_FVS.map((v) => structuredClone(v))
+const ncsMock = NAO_CONFORMIDADES.map((n) => structuredClone(n))
+let proximoModeloMock = modelosFvsMock.length + 1
+let proximaVistoriaMock = vistoriasMock.length + 1
+let proximaNcMock = ncsMock.length + 1
+
+// Modelos, vistorias e NCs da obra aberta, numa leitura só.
+export function listarFvs() {
+  if (!obraAtualId) return semObra()
+  const obraId = obraDaQualidade()
+  if (!obraId) return Promise.resolve({ data: null, erro: 'Não foi possível achar as fichas desta obra.' })
+  return resposta(structuredClone({ modelos: modelosFvsMock, vistorias: daObra(vistoriasMock, obraId), ncs: daObra(ncsMock, obraId) }))
+}
+
+export function salvarModeloFvs(modelo) {
+  if (!modelo.id) {
+    const novo = { ...structuredClone(modelo), id: `mf-${String(proximoModeloMock++).padStart(2, '0')}` }
+    modelosFvsMock = [...modelosFvsMock, novo]
+    return resposta(structuredClone(novo))
+  }
+  if (!modelosFvsMock.some((m) => m.id === modelo.id)) return Promise.resolve({ data: null, erro: 'Este modelo não existe mais. Recarregue a tela.' })
+  modelosFvsMock = modelosFvsMock.map((m) => (m.id === modelo.id ? structuredClone(modelo) : m))
+  return resposta(structuredClone(modelo))
+}
+
+export function criarVistoria(vistoria) {
+  const obraId = obraDaQualidade()
+  if (!obraId) return semObra()
+  const nova = { ...structuredClone(vistoria), id: `vf-${String(proximaVistoriaMock++).padStart(2, '0')}`, obra_id: obraId }
+  vistoriasMock.push(nova)
+  return resposta(structuredClone(nova))
+}
+
+// Vistoria concluída fica travada: não muda mais.
+export function salvarVistoria(vistoria) {
+  const obraId = obraDaQualidade()
+  if (!obraId) return semObra()
+  const i = vistoriasMock.findIndex((v) => v.id === vistoria.id && v.obra_id === obraId)
+  if (i < 0) return Promise.resolve({ data: null, erro: 'Esta vistoria não é da obra aberta. Recarregue a tela.' })
+  if (vistoriasMock[i].status === 'concluida') return Promise.resolve({ data: null, erro: 'Esta vistoria já foi concluída e não pode mudar.' })
+  vistoriasMock[i] = { ...structuredClone(vistoria), obra_id: obraId }
+  return resposta(structuredClone(vistoriasMock[i]))
+}
+
+// NC nova: a camada põe a obra e o próximo código DA OBRA (NC-001, NC-002…).
+export function criarNaoConformidade(nc) {
+  const obraId = obraDaQualidade()
+  if (!obraId) return semObra()
+  if (!vistoriasMock.some((v) => v.id === nc.vistoria_id && v.obra_id === obraId)) return Promise.resolve({ data: null, erro: 'Esta vistoria não é da obra aberta. Recarregue a tela.' })
+  const numero = daObra(ncsMock, obraId).reduce((n, x) => Math.max(n, Number(x.codigo.slice(3))), 0) + 1
+  const nova = { ...structuredClone(nc), id: `nc-${String(proximaNcMock++).padStart(2, '0')}`, obra_id: obraId, codigo: `NC-${String(numero).padStart(3, '0')}` }
+  ncsMock.push(nova)
+  return resposta(structuredClone(nova))
+}
+
+export function salvarNaoConformidade(nc) {
+  const obraId = obraDaQualidade()
+  if (!obraId) return semObra()
+  const i = ncsMock.findIndex((x) => x.id === nc.id && x.obra_id === obraId)
+  if (i < 0) return Promise.resolve({ data: null, erro: 'Esta não conformidade não é da obra aberta. Recarregue a tela.' })
+  if (ncsMock[i].status === 'fechada') return Promise.resolve({ data: null, erro: 'Esta não conformidade já está fechada.' })
+  ncsMock[i] = { ...structuredClone(nc), obra_id: obraId, codigo: ncsMock[i].codigo }
+  return resposta(structuredClone(ncsMock[i]))
+}
+
+// ---------- qualidade: Gemba Walk ----------
+const gembaMock = GEMBA_OBSERVACOES.map((o) => structuredClone(o))
+let proximaGembaMock = gembaMock.length + 1
+
+export function listarGemba() {
+  if (!obraAtualId) return semObra()
+  const obraId = obraDaQualidade()
+  if (!obraId) return Promise.resolve({ data: null, erro: 'Não foi possível achar as observações desta obra.' })
+  return resposta(structuredClone(daObra(gembaMock, obraId)))
+}
+
+export function criarObservacaoGemba(observacao) {
+  const obraId = obraDaQualidade()
+  if (!obraId) return semObra()
+  const nova = { ...structuredClone(observacao), id: `gb-${String(proximaGembaMock++).padStart(2, '0')}`, obra_id: obraId }
+  gembaMock.push(nova)
+  return resposta(structuredClone(nova))
+}
+
+export function salvarObservacaoGemba(observacao) {
+  const obraId = obraDaQualidade()
+  if (!obraId) return semObra()
+  const i = gembaMock.findIndex((o) => o.id === observacao.id && o.obra_id === obraId)
+  if (i < 0) return Promise.resolve({ data: null, erro: 'Esta observação não é da obra aberta. Recarregue a tela.' })
+  gembaMock[i] = { ...structuredClone(observacao), obra_id: obraId }
+  return resposta(structuredClone(gembaMock[i]))
+}
+
+// ---------- relatórios (BI) ----------
+// Lê de uma vez o que cada módulo tem da obra aberta. Um módulo que falhar não derruba os
+// outros: ele volta como null e o erro vai em `erros` (o painel dele mostra o aviso).
+// Módulo que ainda não existe (ex.: Diário de Obra) também volta como null.
+export async function carregarFontesDoBI() {
+  if (!obraAtualId) return semObra()
+  const [ra, rc, rm, rp, rcat, rq, rf, rg] = await Promise.all([
+    listarAtividadesPlanejamento(), lerConfigPlanejamento(), listarMedicoesDaObra(), listarPedidos(),
+    listarCatalogoMateriais(), listarPendencias(), listarFvs(), listarGemba(),
+  ])
+  const erros = {}
+  const pega = (r, modulo) => { if (r.erro) { erros[modulo] = r.erro; return null } return r.data }
+  const med = pega(rm, 'medicoes')
+  const fvs = pega(rf, 'qualidade')
+  return resposta({
+    fontes: {
+      atividades: pega(ra, 'planejamento'), config: pega(rc, 'planejamento'),
+      contratos: med?.contratos ?? null, itensContrato: med?.itens ?? null, medicoes: med?.medicoes ?? null,
+      pedidos: pega(rp, 'materiais'), catalogo: pega(rcat, 'materiais'),
+      pendencias: pega(rq, 'qualidade'), vistorias: fvs?.vistorias ?? null, ncs: fvs?.ncs ?? null, modelosFvs: fvs?.modelos ?? null,
+      gemba: pega(rg, 'qualidade'),
+      diarios: null, // o módulo Diário de Obra ainda não existe
+    },
+    erros,
+  })
+}
+
+// ---------- diário de obra (RDO) ----------
+// Ainda sem tabela no banco: mock em memória da obra aberta (casada pelo código, como as
+// frentes). Um diário por obra e por dia: salvar um dia que já tem diário atualiza o mesmo.
+const diariosMock = DIARIOS.map((d) => structuredClone(d))
+let proximoDiarioMock = diariosMock.length + 1
+
+export function listarDiarios() {
+  if (!obraAtualId) return semObra()
+  const obraId = idMockDaObraAtual()
+  if (!obraId) return Promise.resolve({ data: null, erro: 'Não foi possível achar o diário desta obra.' })
+  return resposta(structuredClone(daObra(diariosMock, obraId)))
+}
+
+export function salvarDiario(diario) {
+  if (!obraAtualId) return semObra()
+  const obraId = idMockDaObraAtual()
+  if (!obraId) return semObra()
+  const i = diariosMock.findIndex((d) => d.obra_id === obraId && (diario.id ? d.id === diario.id : d.data === diario.data))
+  if (diario.id && i < 0) return Promise.resolve({ data: null, erro: 'Este diário não é da obra aberta. Recarregue a tela.' })
+  if (i >= 0) {
+    diariosMock[i] = { ...structuredClone(diario), id: diariosMock[i].id, obra_id: obraId, lancado_em: diariosMock[i].lancado_em, lancado_por: diariosMock[i].lancado_por }
+    return resposta(structuredClone(diariosMock[i]))
+  }
+  const novo = { ...structuredClone(diario), id: `dr-${String(proximoDiarioMock++).padStart(2, '0')}`, obra_id: obraId }
+  diariosMock.push(novo)
+  return resposta(structuredClone(novo))
 }

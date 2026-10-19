@@ -20,6 +20,9 @@ const CAMINHOS = {
   projeto: <><path d="M3 3h18v18H3z" /><path d="M3 9h6v12M15 3v8h6" /></>,
   seguranca: <><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z" /><path d="m9 12 2 2 4-4" /></>,
   logistica: <><path d="M1 4h14v12H1zM15 9h4l4 4v3h-8" /><circle cx="6" cy="18" r="2" /><circle cx="18" cy="18" r="2" /></>,
+  qualidade: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 3h6v3H9zM9 13l2 2 4-4" /></>,
+  camera: <><path d="M3 8h4l2-3h6l2 3h4v12H3z" /><circle cx="12" cy="13" r="4" /></>,
+  relatorios: <><path d="M3 21h18" /><rect x="5" y="11" width="3" height="7" /><rect x="10.5" y="6" width="3" height="12" /><rect x="16" y="13" width="3" height="5" /></>,
   hoje: <><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M3 9h18M8 2v4M16 2v4M12 13v5M9.5 15.5h5" /></>,
   frentes: <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />,
   trocar: <path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" />,
@@ -128,7 +131,7 @@ export function Navegacao({ itens, atual, goto, desktop, usuario, onSair }) {
     )
   }
   return (
-    <nav className="barra-inf" style={{ gridTemplateColumns: `repeat(${itens.length}, 1fr)` }} aria-label="Menu">
+    <nav className={`barra-inf ${itens.length > 6 ? 'apertada' : ''}`} style={{ gridTemplateColumns: `repeat(${itens.length}, 1fr)` }} aria-label="Menu">
       {botoes}
     </nav>
   )

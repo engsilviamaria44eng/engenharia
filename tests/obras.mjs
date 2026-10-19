@@ -4,7 +4,11 @@ import { escolherObraInicial, daObra, podeTrocarDeObra, chaveObraGuardada } from
 import { definirObraAtual, listarFrentes, listarObrasDoUsuario, listarPedidos, criarPedido, salvarPedido,
   listarAtividadesPlanejamento, criarAtividadePlanejamento, salvarAtividadesPlanejamento,
   lerConfigPlanejamento, salvarConfigPlanejamento,
-  listarMedicoesDaObra, criarContrato, salvarContrato, criarMedicao, salvarMedicao } from '../src/lib/dados.js'
+  listarMedicoesDaObra, criarContrato, salvarContrato, criarMedicao, salvarMedicao,
+  listarPendencias, criarPendencia, salvarPendencia,
+  listarFvs, criarVistoria, salvarVistoria, criarNaoConformidade, salvarNaoConformidade,
+  listarGemba, criarObservacaoGemba, salvarObservacaoGemba,
+  listarDiarios, salvarDiario } from '../src/lib/dados.js'
 
 let ok = 0
 let tot = 0
@@ -125,5 +129,69 @@ conferir('sem obra: contratos devolvem erro', (await listarMedicoesDaObra()).dat
 conferir('engenheiro vê as 3 obras', (await listarObrasDoUsuario('u-eng')).data.length, 3)
 conferir('mestre Ricardo vê só o Jardim Europa', (await listarObrasDoUsuario('u-ricardo')).data.map((o) => o.codigo), ['JE-01'])
 
+// Qualidade: pendências não vazam entre obras, e o número é contado por obra
+definirObraAtual('obra-je')
+const pqJE = (await listarPendencias()).data
+conferir('JE-01: só pendências do Jardim Europa', pqJE.length === 6 && pqJE.every((x) => x.obra_id === 'obra-je'), true)
+definirObraAtual('obra-vn')
+const pqVN = (await listarPendencias()).data
+conferir('VN-02: só as 2 da Vila Nova', pqVN.map((x) => x.numero), [1, 2])
+const pqNova = (await criarPendencia({ descricao: 'x', local: 'y', empresa: 'z', responsavel: 'w', prazo: '2026-10-30', status: 'pendente', observacoes: '' })).data
+conferir('pendência nova nasce na obra aberta com o nº seguinte DELA', [pqNova.obra_id, pqNova.numero], ['obra-vn', 3])
+conferir('salvar pendência de outra obra é recusado', (await salvarPendencia({ ...pqJE[0], status: 'resolvido' })).data, null)
+conferir('o número não muda ao salvar', (await salvarPendencia({ ...pqNova, numero: 99 })).data.numero, 3)
+definirObraAtual('obra-ca')
+conferir('Alphaville: nenhuma pendência', (await listarPendencias()).data, [])
+definirObraAtual(null)
+conferir('sem obra: pendências devolvem erro', (await listarPendencias()).data, null)
+// Qualidade · FVS: vistorias e NCs não vazam; modelos valem para todas; NC numerada por obra
+definirObraAtual('obra-je')
+const fJE = (await listarFvs()).data
+conferir('JE-01: 2 vistorias e 3 NCs dela', [fJE.vistorias.length, fJE.ncs.length, [...fJE.vistorias, ...fJE.ncs].every((x) => x.obra_id === 'obra-je')], [2, 3, true])
+definirObraAtual('obra-vn')
+const fVN = (await listarFvs()).data
+conferir('VN-02: 1 vistoria, 1 NC, os mesmos 2 modelos', [fVN.vistorias.length, fVN.ncs.length, fVN.modelos.length], [1, 1, 2])
+const vNova = (await criarVistoria({ modelo_id: 'mf-02', ambiente: 'Sala', status: 'em_andamento', grupos: [], respostas: {} })).data
+conferir('vistoria nova nasce na obra aberta', vNova.obra_id, 'obra-vn')
+const ncNova = (await criarNaoConformidade({ vistoria_id: vNova.id, item_id: 'x', status: 'aberta', timeline: [] })).data
+conferir('NC nova: código seguinte DA OBRA', [ncNova.obra_id, ncNova.codigo], ['obra-vn', 'NC-002'])
+conferir('NC em vistoria de outra obra é recusada', (await criarNaoConformidade({ vistoria_id: fJE.vistorias[0].id, item_id: 'x' })).data, null)
+conferir('salvar NC de outra obra é recusado', (await salvarNaoConformidade({ ...fJE.ncs[0], status: 'fechada' })).data, null)
+await salvarNaoConformidade({ ...ncNova, status: 'fechada' })
+conferir('NC fechada não muda mais', (await salvarNaoConformidade({ ...ncNova, status: 'aberta' })).erro, 'Esta não conformidade já está fechada.')
+await salvarVistoria({ ...vNova, status: 'concluida' })
+conferir('vistoria concluída não muda mais', (await salvarVistoria({ ...vNova, respostas: { a: 'nc' } })).erro, 'Esta vistoria já foi concluída e não pode mudar.')
+definirObraAtual('obra-ca')
+conferir('Alphaville: nenhuma vistoria nem NC', [(await listarFvs()).data.vistorias, (await listarFvs()).data.ncs], [[], []])
+definirObraAtual(null)
+conferir('sem obra: FVS devolve erro', (await listarFvs()).data, null)
+// Qualidade · Gemba: observações não vazam entre obras
+definirObraAtual('obra-je')
+const gbJE = (await listarGemba()).data
+conferir('JE-01: 8 observações dela', [gbJE.length, gbJE.every((x) => x.obra_id === 'obra-je')], [8, true])
+definirObraAtual('obra-vn')
+conferir('VN-02: 2 observações', (await listarGemba()).data.map((x) => x.id), ['gb-09', 'gb-10'])
+const gbNova = (await criarObservacaoGemba({ local: 'x', descricao: 'y', desperdicios: ['Espera'], status: 'pendente' })).data
+conferir('observação nova nasce na obra aberta', gbNova.obra_id, 'obra-vn')
+conferir('mover observação de outra obra é recusado', (await salvarObservacaoGemba({ ...gbJE[0], status: 'resolvido' })).data, null)
+definirObraAtual('obra-ca')
+conferir('Alphaville: nenhuma observação', (await listarGemba()).data, [])
+definirObraAtual(null)
+conferir('sem obra: Gemba devolve erro', (await listarGemba()).data, null)
+// Diário de obra: dias não vazam entre obras; um diário por obra e por dia
+definirObraAtual('obra-je')
+const drJE = (await listarDiarios()).data
+conferir('JE-01: 14 dias dela', [drJE.length, drJE.every((x) => x.obra_id === 'obra-je')], [14, true])
+definirObraAtual('obra-vn')
+conferir('VN-02: 2 dias', (await listarDiarios()).data.map((x) => x.data), ['2026-10-16', '2026-10-17'])
+const drNovo = (await salvarDiario({ data: '2026-10-19', clima: {}, servicos: [], fotos: [], equipamentos: [], ocorrencias: 'teste', lancado_por: 'M', lancado_em: '2026-10-19' })).data
+conferir('diário novo nasce na obra aberta', drNovo.obra_id, 'obra-vn')
+const drMesmoDia = (await salvarDiario({ data: '2026-10-19', clima: {}, servicos: [], fotos: [], equipamentos: [], ocorrencias: 'mudou', lancado_por: 'Outro', lancado_em: '2026-10-20' })).data
+conferir('salvar o mesmo dia atualiza o mesmo diário (e guarda quem lançou primeiro)', [drMesmoDia.id, drMesmoDia.ocorrencias, drMesmoDia.lancado_por, (await listarDiarios()).data.length], [drNovo.id, 'mudou', 'M', 3])
+conferir('editar diário de outra obra é recusado', (await salvarDiario({ ...drJE[0], ocorrencias: 'x' })).data, null)
+definirObraAtual('obra-ca')
+conferir('Alphaville: nenhum diário', (await listarDiarios()).data, [])
+definirObraAtual(null)
+conferir('sem obra: diário devolve erro', (await listarDiarios()).data, null)
 console.log(`${ok}/${tot} — obras`)
 process.exit(ok === tot ? 0 : 1)
