@@ -257,6 +257,128 @@ button:active{opacity:.82}
 .aviso-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + var(--seguro-inf));background:var(--escuro);color:#fff;padding:12px 18px;border-radius:var(--raio);font-weight:600;z-index:30;max-width:calc(100% - 32px);text-align:center;box-shadow:0 4px 12px rgba(11,34,54,.25)}
 .app[data-desktop="1"] .aviso-toast{bottom:24px}
 
+/* ---------- PLANEJAMENTO ---------- */
+.linha-config{align-self:flex-start;min-height:44px;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:15px;color:var(--texto-2);text-align:left}
+.linha-config b{color:var(--texto);font-weight:600}
+.linha-config .link{color:var(--pri);font-weight:700;text-decoration:underline}
+.btn:disabled,.btn-mini:disabled{opacity:.45;cursor:not-allowed}
+.campos-lado{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:480px){ .campos-lado{grid-template-columns:1fr 1fr} }
+.dias-semana{display:flex;flex-wrap:wrap;gap:6px}
+.dias-semana .chip-filtro{padding:0 12px;min-width:56px}
+.lista-feriados{list-style:none;display:flex;flex-direction:column;border:1px solid var(--linha);border-radius:var(--raio)}
+.lista-feriados li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 4px 4px 12px;border-bottom:1px solid var(--linha);font-variant-numeric:tabular-nums}
+.lista-feriados li:last-child{border-bottom:0}
+.linha-add{display:flex;gap:8px}
+.linha-add input{flex:1;min-width:0}
+.linha-add .btn{min-height:48px;padding:0 14px;font-size:15px}
+/* EAP: árvore com recuo por nível (--nivel) */
+.eap{list-style:none}
+.eap-linha{display:grid;grid-template-columns:1fr;gap:6px;padding:12px 16px 12px calc(14px + var(--nivel) * 20px);border-bottom:1px solid var(--linha);position:relative}
+.eap-linha:last-child{border-bottom:0}
+.eap-linha::before{content:"";position:absolute;left:calc(6px + var(--nivel) * 20px);top:12px;bottom:12px;width:3px;border-radius:2px;background:var(--linha)}
+.eap-linha.grupo{background:#F7FAFC}
+.eap-linha.grupo::before{background:var(--pri)}
+.eap-linha.arquivada{opacity:.7;background:var(--fundo)}
+.eap-topo{display:flex;align-items:baseline;gap:10px;min-width:0}
+.eap-cod{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--pri);flex:none;min-width:2.5em}
+.eap-titulo{font-size:17px;font-weight:600;line-height:1.3;min-width:0;overflow-wrap:anywhere}
+.eap-linha.grupo .eap-titulo{font-weight:700}
+.eap-info{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;font-size:14px;color:var(--texto-2)}
+.eap-info b{color:var(--texto)}
+.eap-info .nw{white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+.eap-acoes{display:flex;flex-wrap:wrap;gap:6px}
+.app[data-desktop="1"] .eap-linha{grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:16px}
+.app[data-desktop="1"] .eap-topo,.app[data-desktop="1"] .eap-info,.app[data-desktop="1"] .eap-linha .pills{grid-column:1}
+.app[data-desktop="1"] .eap-acoes{grid-column:2;grid-row:1 / span 3;justify-content:flex-end}
+/* LONGO PRAZO: cronograma em barras (CSS puro) e lista no celular */
+.atalhos{display:flex;flex-wrap:wrap;gap:6px}
+.legenda{display:inline-flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--texto-2);margin-left:auto}
+.legenda span{display:inline-flex;align-items:center;gap:6px}
+.legenda i{display:inline-block;width:18px;height:10px;border-radius:3px}
+.legenda .lg-real{background:var(--pri)}
+.legenda .lg-prev{width:3px;height:14px;background:var(--escuro);border-radius:1px}
+.legenda .lg-hoje{width:3px;height:14px;background:var(--acento);border-radius:1px}
+.barra-rp{position:relative;display:block;height:12px;background:#DCE6E8;border-radius:999px;max-width:320px}
+.barra-rp i{display:block;height:100%;background:var(--pri);border-radius:999px}
+.barra-rp em{position:absolute;top:-3px;bottom:-3px;width:3px;margin-left:-1px;background:var(--escuro);border-radius:1px}
+.gantt{background:var(--cartao);border-radius:var(--raio);box-shadow:var(--sombra);overflow-x:auto}
+.gantt-trilho{display:flex;flex-direction:column;width:max-content;padding-right:56px}
+.gantt-linha{display:grid;grid-template-columns:240px var(--largura);border-bottom:1px solid var(--linha)}
+.gantt-linha:last-child{border-bottom:0}
+.gantt-linha.gantt-cab{position:sticky;top:0;background:#F7FAFC;font-size:13px;font-weight:600;color:var(--texto-2)}
+.gantt-linha.grupo{background:#F7FAFC}
+.gantt-rot{position:sticky;left:0;z-index:2;background:inherit;background-color:var(--cartao);display:flex;align-items:center;gap:8px;padding:6px 10px 6px calc(10px + var(--nivel,0) * 14px);min-height:44px;border-right:1px solid var(--linha);min-width:0}
+.gantt-linha.grupo .gantt-rot,.gantt-linha.gantt-cab .gantt-rot{background-color:#F7FAFC}
+.gantt-linha.grupo .gantt-nome{font-weight:700}
+.gantt-nome{font-size:15px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.gantt-faixa{position:relative;min-height:44px}
+.gantt-col{position:absolute;top:0;bottom:0;display:flex;align-items:center;padding-left:6px;border-left:1px solid var(--linha);white-space:nowrap;font-variant-numeric:tabular-nums}
+.gantt-grade{position:absolute;top:0;bottom:0;width:1px;background:var(--linha)}
+.gantt-hoje{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--acento);z-index:1}
+.gantt-barra{position:absolute;top:11px;height:22px;min-width:6px;padding:0;background:var(--pri-claro);border:1px solid var(--pri);border-radius:5px;overflow:visible;z-index:1}
+.gantt-barra i{display:block;height:100%;background:var(--pri);border-radius:4px 0 0 4px}
+.gantt-barra em{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-1px;background:var(--escuro);border-radius:1px}
+.gantt-barra.atrasada{border-color:var(--vermelho);background:var(--fundo-verm)}
+.gantt-barra.concluida{border-color:var(--verde)}
+.gantt-barra.concluida i{background:var(--verde);border-radius:4px}
+.gantt-barra:not(:disabled):hover{box-shadow:0 0 0 3px var(--pri-claro)}
+.gantt-barra:disabled{cursor:default;opacity:1;top:15px;height:14px}
+.gantt-pct{position:absolute;top:13px;font-size:13px;font-weight:600;color:var(--texto-2);white-space:nowrap}
+/* MÉDIO PRAZO: quadro de restrições por semana. Cada tipo tem cor (--tc texto/borda, --tf fundo) e ícone. */
+.tipo-material{--tc:#8A5A00;--tf:#FDF1DA}
+.tipo-mao_de_obra{--tc:#175D8E;--tf:#E6EFF7}
+.tipo-metodo{--tc:#6B3FA0;--tf:#F1EAF9}
+.tipo-equipamento{--tc:#4A5B6B;--tf:#E8EDF2}
+.tipo-projeto{--tc:#0E7C86;--tf:#E0F3F4}
+.tipo-seguranca{--tc:#B42318;--tf:#FDECEA}
+.tipo-logistica{--tc:#2F855A;--tf:#E3F1E8}
+.selo-tipo{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--tf);color:var(--tc);white-space:nowrap}
+.restricao{background:var(--cartao);border-radius:var(--raio);box-shadow:var(--sombra);padding:12px;display:flex;flex-direction:column;gap:6px;border-left:5px solid var(--tc)}
+.restricao.vencida{background:var(--fundo-verm)}
+.restricao.resolvida{opacity:.75}
+.restricao.resolvida .restricao-desc{text-decoration:line-through}
+.restricao-desc{font-size:16px;line-height:1.3}
+.restricao .pedido-topo .tag{min-width:0;font-size:12px;padding:3px 8px}
+.btn-mini.seta{min-width:48px;font-size:18px;padding:0}
+.tipos{display:flex;flex-wrap:wrap;gap:6px}
+.tipo-op{min-height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border-radius:999px;border:2px solid var(--linha);background:#fff;font-size:15px;font-weight:600;color:var(--tc)}
+.tipo-op.ativo{border-color:var(--tc);background:var(--tf)}
+.filtros-linha{display:flex;flex-wrap:wrap;gap:12px}
+.filtro{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;color:var(--texto-2);min-width:160px}
+.filtro select{min-height:44px;border:2px solid var(--linha);border-radius:var(--raio);padding:0 10px;font:inherit;font-size:15px;background:#fff;color:var(--texto)}
+.semana-datas{font-size:13px;font-weight:500;color:var(--texto-2);margin-left:4px;white-space:nowrap}
+.coluna-info{font-size:13px;color:var(--texto-2);padding:0 6px}
+/* CURTO PRAZO: semana, PPC e checklist */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.semana-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.semana-nav-txt{display:flex;flex-direction:column;min-width:150px;text-align:center}
+.semana-nav-txt b{font-size:17px}
+.semana-nav-txt span{font-size:14px;color:var(--texto-2)}
+.ppc{background:var(--cartao);border-radius:var(--raio);box-shadow:var(--sombra);padding:16px;display:grid;gap:8px;border-left:6px solid var(--pri)}
+.ppc .rot{font-size:15px;font-weight:700;color:var(--texto-2)}
+.ppc-num{display:flex;flex-direction:column}
+.ppc-num .val{font-size:48px;font-weight:700;line-height:1.05;letter-spacing:-.02em;color:var(--pri)}
+.ppc-barra{height:14px;background:#DCE6E8;border-radius:999px;overflow:hidden}
+.ppc-barra i{display:block;height:100%;background:var(--pri);border-radius:999px}
+.ppc-txt{font-size:15px;color:var(--texto-2)}
+.ppc-txt b{color:var(--texto)}
+.ppc-causas ul{list-style:none;display:flex;flex-wrap:wrap;gap:6px 16px;font-size:15px;margin-top:4px}
+.causas{display:flex;flex-wrap:wrap;gap:6px}
+.causas .chip-filtro{padding:0 12px}
+.mover{flex:1;min-width:0}
+.mover select{width:100%;min-height:44px;border:2px solid var(--linha);border-radius:var(--raio);padding:0 8px;font:inherit;font-size:14px;font-weight:600;background:#fff;color:var(--texto)}
+.nr-texto{font-size:14px;color:var(--verm-forte)}
+.nr-bloco{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--fundo-verm);color:var(--verm-forte);border-radius:var(--raio);padding:8px 8px 8px 12px;font-size:15px}
+.checklist{list-style:none;display:flex;flex-direction:column;border:1px solid var(--linha);border-radius:var(--raio)}
+.checklist li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:6px 8px 6px 4px;border-bottom:1px solid var(--linha)}
+.checklist li:last-child{border-bottom:0}
+.checklist li.nao{background:var(--fundo-verm)}
+.checklist .nr-texto{flex-basis:100%;padding-left:44px}
+.check{flex:1;min-width:0;display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer}
+.check input{width:22px;height:22px;margin:0 8px;accent-color:var(--pri);flex:none}
+.check .feita{text-decoration:line-through;color:var(--texto-2)}
+.check-acoes{display:flex;gap:6px}
 @media (max-width:380px){
   .stat .val{font-size:26px}
   .entrega .data{font-size:34px}

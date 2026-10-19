@@ -11,6 +11,15 @@ const CAMINHOS = {
   diario: <><path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z" /><path d="M8 9h8M8 13h6" /></>,
   medicao: <><path d="M3 17 17 3l4 4L7 21H3z" /><path d="m13 7 2 2M10 10l2 2M7 13l2 2" /></>,
   obras: <><path d="M3 21h18M5 21V9l7-5 7 5v12" /><path d="M10 21v-6h4v6" /></>,
+  planejamento: <><path d="M3 3v18h18" /><path d="M7 7h7M10 12h8M8 17h6" /></>,
+  // tipos de restrição do Planejamento
+  material: <><path d="M21 8 12 3 3 8v8l9 5 9-5z" /><path d="m3 8 9 5 9-5M12 13v8" /></>,
+  mao_de_obra: <><circle cx="12" cy="7" r="4" /><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" /></>,
+  metodo: <><path d="M9 6h11M9 12h11M9 18h11" /><path d="m3 6 1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2" /></>,
+  equipamento: <><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1" /></>,
+  projeto: <><path d="M3 3h18v18H3z" /><path d="M3 9h6v12M15 3v8h6" /></>,
+  seguranca: <><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z" /><path d="m9 12 2 2 4-4" /></>,
+  logistica: <><path d="M1 4h14v12H1zM15 9h4l4 4v3h-8" /><circle cx="6" cy="18" r="2" /><circle cx="18" cy="18" r="2" /></>,
   hoje: <><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M3 9h18M8 2v4M16 2v4M12 13v5M9.5 15.5h5" /></>,
   frentes: <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />,
   trocar: <path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" />,
@@ -99,10 +108,11 @@ export function CabecalhoObra() {
 }
 
 export function Navegacao({ itens, atual, goto, desktop, usuario, onSair }) {
-  const botoes = itens.map(([chave, rotulo]) => (
+  // Item do menu: [chave, rótulo, rótulo curto opcional para a barra do celular].
+  const botoes = itens.map(([chave, rotulo, curto]) => (
     <button key={chave} className={`nav-item ${atual === chave ? 'ativo' : ''}`}
-      onClick={() => goto(chave)} aria-current={atual === chave ? 'page' : undefined}>
-      <span className="ic"><Icon nome={chave} /></span><span>{rotulo}</span>
+      onClick={() => goto(chave)} aria-current={atual === chave ? 'page' : undefined} aria-label={rotulo}>
+      <span className="ic"><Icon nome={chave} /></span><span>{desktop ? rotulo : (curto ?? rotulo)}</span>
     </button>
   ))
   if (desktop) {

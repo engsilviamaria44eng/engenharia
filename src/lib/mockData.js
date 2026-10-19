@@ -90,3 +90,75 @@ export const PEDIDOS = [
   { id: 'pd-10', obra_id: 'obra-vn', material_id: 'm-cimento', quantidade: 30, frente: 'Muro de divisa', prioridade: 'normal', status: 'solicitar', fornecedor: '', previsao_entrega: '', historico: [{ status: 'solicitar', data: '2026-10-16' }], recebimento: { ...sem } },
   { id: 'pd-11', obra_id: 'obra-vn', material_id: 'm-bloco', quantidade: 1500, frente: 'Alvenaria', prioridade: 'normal', status: 'comprado', fornecedor: 'Cerâmica Vale Verde', previsao_entrega: '2026-10-24', historico: [{ status: 'solicitar', data: '2026-10-05' }, { status: 'cotacao', data: '2026-10-07' }, { status: 'comprado', data: '2026-10-10' }], recebimento: { ...sem } },
 ]
+
+// ---------- PLANEJAMENTO (Last Planner) ----------
+// Uma lista só de atividades por obra, usada pelas 4 abas (EAP, longo, médio e curto prazo).
+// Hoje dos exemplos = segunda 19/10/2026; semana atual = 19/10 a 23/10.
+// JE-01: 4 grupos e 9 atividades; 2 concluídas nesta semana (o PPC já aparece), 1 acumulada
+// (laje, devia ter terminado em 16/10; ficou como não realizada na semana passada, por\n// falta de material) e 2 impedidas por restrição aberta.
+// VN-02: poucos registros (1 grupo, 3 atividades). CA-03 (parada): nenhuma, para a tela vazia.
+// Restrição: { id, descricao, tipo, prazo, responsavel, semana (segunda-feira), resolvida }.
+// Subtarefa: { id, texto, feita, nao_realizado }. nao_realizado: null ou { causa, obs }.
+const atv = (a) => ({ progresso: 0, status: 'a_fazer', subtarefas: [], restricoes: [], nao_realizado: null, arquivada: false, ...a })
+export const ATIVIDADES_PLANEJAMENTO = [
+  atv({ id: 'at-01', obra_id: 'obra-je', pai_id: null, ordem: 1, titulo: 'Estrutura', inicio: '2026-06-01', fim: '2026-10-16' }),
+  atv({ id: 'at-02', obra_id: 'obra-je', pai_id: 'at-01', ordem: 1, titulo: 'Fundação', inicio: '2026-06-01', fim: '2026-07-17', progresso: 100, status: 'concluido' }),
+  atv({
+    id: 'at-03', obra_id: 'obra-je', pai_id: 'at-01', ordem: 2, titulo: 'Laje do 2º pavimento', inicio: '2026-09-14', fim: '2026-10-16', progresso: 40, status: 'em_andamento',
+    nao_realizado: { causa: 'material', obs: 'Vergalhão não chegou', semana: '2026-10-12' },
+    subtarefas: [
+      { id: 'st-01', texto: 'Escoramento e fôrmas', feita: true, nao_realizado: null },
+      { id: 'st-02', texto: 'Armação (vergalhão CA-50)', feita: false, nao_realizado: { causa: 'material', obs: '', semana: '2026-10-12' } },
+      { id: 'st-03', texto: 'Concretagem', feita: false, nao_realizado: null },
+    ],
+    restricoes: [
+      { id: 'rs-01', descricao: 'Vergalhão CA-50 atrasado no fornecedor', tipo: 'material', prazo: '2026-10-21', responsavel: 'Compras', semana: '2026-10-19', resolvida: false },
+      { id: 'rs-02', descricao: 'Confirmar bomba de concreto para a concretagem', tipo: 'equipamento', prazo: '2026-10-28', responsavel: 'Engenheiro', semana: '2026-10-26', resolvida: false },
+    ],
+  }),
+  atv({ id: 'at-04', obra_id: 'obra-je', pai_id: null, ordem: 2, titulo: 'Alvenaria', inicio: '2026-08-03', fim: '2026-11-13' }),
+  atv({ id: 'at-05', obra_id: 'obra-je', pai_id: 'at-04', ordem: 1, titulo: 'Alvenaria 1º pavimento', inicio: '2026-08-03', fim: '2026-10-20', progresso: 100, status: 'concluido' }),
+  atv({
+    id: 'at-06', obra_id: 'obra-je', pai_id: 'at-04', ordem: 2, titulo: 'Alvenaria 2º pavimento', inicio: '2026-10-05', fim: '2026-11-13', progresso: 60, status: 'em_andamento',
+    subtarefas: [
+      { id: 'st-04', texto: 'Marcação da 1ª fiada', feita: true, nao_realizado: null },
+      { id: 'st-05', texto: 'Elevação até o respaldo', feita: false, nao_realizado: null },
+      { id: 'st-06', texto: 'Vergas e contravergas', feita: false, nao_realizado: null },
+    ],
+    restricoes: [
+      { id: 'rs-03', descricao: 'Contratar o 2º pedreiro da equipe', tipo: 'mao_de_obra', prazo: '2026-10-09', responsavel: 'Mestre Ricardo', semana: '2026-10-05', resolvida: true },
+    ],
+  }),
+  atv({ id: 'at-07', obra_id: 'obra-je', pai_id: null, ordem: 3, titulo: 'Instalações', inicio: '2026-10-01', fim: '2026-11-06' }),
+  atv({
+    id: 'at-08', obra_id: 'obra-je', pai_id: 'at-07', ordem: 1, titulo: 'Elétrica — tubulação', inicio: '2026-10-01', fim: '2026-10-23', progresso: 25, status: 'em_andamento',
+    subtarefas: [
+      { id: 'st-07', texto: 'Eletrodutos na laje', feita: true, nao_realizado: null },
+      { id: 'st-08', texto: 'Caixas 4x2 nas paredes', feita: false, nao_realizado: null },
+    ],
+  }),
+  atv({
+    id: 'at-09', obra_id: 'obra-je', pai_id: 'at-07', ordem: 2, titulo: 'Hidráulica — água fria', inicio: '2026-10-19', fim: '2026-11-06',
+    restricoes: [
+      { id: 'rs-04', descricao: 'Compatibilizar o shaft com a estrutura', tipo: 'projeto', prazo: '2026-10-23', responsavel: 'Engenheiro', semana: '2026-10-19', resolvida: false },
+    ],
+  }),
+  atv({ id: 'at-10', obra_id: 'obra-je', pai_id: null, ordem: 4, titulo: 'Revestimento e acabamento', inicio: '2026-10-13', fim: '2026-12-18' }),
+  atv({ id: 'at-11', obra_id: 'obra-je', pai_id: 'at-10', ordem: 1, titulo: 'Chapisco interno', inicio: '2026-10-13', fim: '2026-10-21', progresso: 100, status: 'concluido' }),
+  atv({
+    id: 'at-12', obra_id: 'obra-je', pai_id: 'at-10', ordem: 2, titulo: 'Reboco interno', inicio: '2026-10-22', fim: '2026-11-20',
+    restricoes: [
+      { id: 'rs-05', descricao: 'Receber a areia média do Areial São Jorge', tipo: 'material', prazo: '2026-10-22', responsavel: 'Compras', semana: '2026-10-19', resolvida: true },
+    ],
+  }),
+  atv({
+    id: 'at-13', obra_id: 'obra-je', pai_id: 'at-10', ordem: 3, titulo: 'Gesso forro', inicio: '2026-11-23', fim: '2026-12-18',
+    restricoes: [
+      { id: 'rs-06', descricao: 'Fechar contrato com a Gesso & Cia', tipo: 'mao_de_obra', prazo: '2026-11-13', responsavel: 'Engenheiro', semana: '2026-11-09', resolvida: true },
+    ],
+  }),
+  atv({ id: 'at-14', obra_id: 'obra-vn', pai_id: null, ordem: 1, titulo: 'Alvenaria e muro', inicio: '2026-09-21', fim: '2026-11-13' }),
+  atv({ id: 'at-15', obra_id: 'obra-vn', pai_id: 'at-14', ordem: 1, titulo: 'Alvenaria do pavimento superior', inicio: '2026-09-21', fim: '2026-10-23', progresso: 85, status: 'em_andamento' }),
+  atv({ id: 'at-16', obra_id: 'obra-vn', pai_id: 'at-14', ordem: 2, titulo: 'Muro de divisa', inicio: '2026-10-26', fim: '2026-11-13' }),
+  atv({ id: 'at-17', obra_id: 'obra-vn', pai_id: null, ordem: 2, titulo: 'Contrapiso do térreo', inicio: '2026-10-13', fim: '2026-10-30', progresso: 70, status: 'em_andamento' }),
+]

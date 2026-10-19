@@ -1,7 +1,8 @@
 // Regra multi-obra: em qual obra o app abre, e que nenhum dado de outra obra vaza.
 // Node puro: node tests/obras.mjs
 import { escolherObraInicial, daObra, podeTrocarDeObra, chaveObraGuardada } from '../src/lib/obras.js'
-import { definirObraAtual, listarFrentes, listarObrasDoUsuario, listarPedidos, criarPedido, salvarPedido } from '../src/lib/dados.js'
+import { definirObraAtual, listarFrentes, listarObrasDoUsuario, listarPedidos, criarPedido, salvarPedido,
+  listarAtividadesPlanejamento, criarAtividadePlanejamento, salvarAtividadesPlanejamento } from '../src/lib/dados.js'
 
 let ok = 0
 let tot = 0
@@ -65,6 +66,21 @@ definirObraAtual('obra-ca')
 conferir('Alphaville: nenhum pedido', (await listarPedidos()).data, [])
 definirObraAtual(null)
 conferir('sem obra: pedidos devolvem erro, nunca todos', (await listarPedidos()).data, null)
+
+// Planejamento: atividades também não vazam entre obras, e nada é salvo na obra errada
+definirObraAtual('obra-je')
+const aje = (await listarAtividadesPlanejamento()).data
+conferir('JE-01: só atividades do Jardim Europa', aje.length > 0 && aje.every((a) => a.obra_id === 'obra-je'), true)
+definirObraAtual('obra-vn')
+const avn = (await listarAtividadesPlanejamento()).data
+conferir('VN-02: só atividades da Vila Nova', avn.length > 0 && avn.every((a) => a.obra_id === 'obra-vn'), true)
+const atvNova = (await criarAtividadePlanejamento({ pai_id: null, ordem: 9, titulo: 'Teste', inicio: '2026-10-19', fim: '2026-10-20' })).data
+conferir('atividade nova nasce na obra aberta', atvNova.obra_id, 'obra-vn')
+conferir('salvar atividade de outra obra é recusado', (await salvarAtividadesPlanejamento([{ ...aje[0], titulo: 'x' }])).data, null)
+definirObraAtual('obra-ca')
+conferir('Alphaville: nenhuma atividade', (await listarAtividadesPlanejamento()).data, [])
+definirObraAtual(null)
+conferir('sem obra: atividades devolvem erro, nunca todas', (await listarAtividadesPlanejamento()).data, null)
 
 // Cada pessoa só vê as obras em que trabalha
 conferir('engenheiro vê as 3 obras', (await listarObrasDoUsuario('u-eng')).data.length, 3)

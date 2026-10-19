@@ -49,7 +49,10 @@ só quem fez login, e cada pessoa só vê as obras em que trabalha (função `mi
   O app casa a obra do banco com a do exemplo **pelo código** (JE-01, VN-02, CA-03).
 - **Frentes de serviço.** Por isso, no pedido, a frente é guardada como **texto**
   (o nome). Quando as frentes forem para o banco, vira `frente_id`.
-- Todo o resto (diário, orçamento, cronograma…): ainda exemplo.
+- **Planejamento** (EAP, cronograma, restrições, semana e PPC): ainda exemplo, sem tabela.
+  Quando for para o banco, a atividade leva `obra_id`, e as restrições e subtarefas, que hoje
+  ficam dentro da atividade, podem virar jsonb ou tabelas próprias.
+- Todo o resto (diário, orçamento, cronograma físico-financeiro…): ainda exemplo.
 
 ## Dados de exemplo no banco (seed)
 

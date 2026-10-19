@@ -96,6 +96,10 @@ git e a Vercel publica sozinha. A pessoa não digita comando.
   em que foi aplicada (`AAAAMMDD-N-assunto.sql`).
 - **Provisórios do back-end:** membros, frentes e login ainda são mock, casados com o
   banco pelo `codigo` da obra; `pedidos_material.frente` é texto (vira `frente_id`).
+- **Planejamento (Last Planner) ainda é só mock**, sem tabela: `dados.js` guarda as atividades
+  em memória por obra (voltam ao exemplo ao recarregar). As 4 abas (EAP, longo, médio, curto)
+  usam UMA lista, no `PlanejamentoContext`; restrições e subtarefas ficam dentro da atividade.
+  Regras em `src/lib/planejamento.js` (testes em `tests/planejamento.mjs`).
 - **No Windows, use `npm.cmd`** (e `npx.cmd`) se o PowerShell bloquear o `npm.ps1`.
   Nunca mude a política de execução do Windows por causa disso.
 - **O projeto está dentro do OneDrive.** A `node_modules` é recriável (`npm install`); se o
