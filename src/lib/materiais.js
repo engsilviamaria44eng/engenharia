@@ -2,7 +2,7 @@
 // Cada pedido é um lote de material (ex.: "50 sacos de cimento") que anda por 5 colunas.
 import { diasEntre, somarDias } from './datas.js'
 
-// Vocabulário de status: idêntico ao CHECK do banco quando ele existir.
+// Vocabulário de status: idêntico ao CHECK de pedidos_material no banco.
 export const STATUS = [
   { id: 'solicitar', rotulo: 'Solicitar' },
   { id: 'cotacao', rotulo: 'Em cotação' },

@@ -11,7 +11,7 @@ import { supabase } from './supabase.js'
 import { OBRAS, MEMBROS, FRENTES, USUARIOS, MATERIAIS_CATALOGO, PEDIDOS } from './mockData.js'
 import { daObra } from './obras.js'
 
-export const USAR_MOCK = !supabase
+const USAR_MOCK = !supabase
 
 let obraAtualId = null
 // código de cada obra do banco (id -> código), para casar com o que ainda é mock
@@ -58,6 +58,7 @@ export async function listarObrasDoUsuario(usuarioId) {
   if (USAR_MOCK) return resposta(OBRAS.filter((o) => idsMock.includes(o.id)))
 
   const codigos = OBRAS.filter((o) => idsMock.includes(o.id)).map((o) => o.codigo)
+  if (codigos.length === 0) return resposta([])
   const r = await doBanco(
     supabase.from('obras')
       .select('id, codigo, nome, endereco, cliente, data_inicio, data_entrega, situacao')
@@ -72,15 +73,15 @@ export async function listarObrasDoUsuario(usuarioId) {
 // ---------- lançamentos: sempre da obra atual ----------
 export function listarFrentes() {
   if (!obraAtualId) return semObra()
-  return resposta(daObra(FRENTES, idMockDaObraAtual()))
+  const idMock = idMockDaObraAtual()
+  if (!idMock) return Promise.resolve({ data: null, erro: 'Não foi possível achar as frentes desta obra.' })
+  return resposta(daObra(FRENTES, idMock))
 }
 
 // ---------- materiais (Kanban de pedidos) ----------
 // Mock em memória (testes): os pedidos mudam durante o uso e voltam ao exemplo ao recarregar.
 const pedidosMock = PEDIDOS.map((p) => structuredClone(p))
 let proximoIdMock = pedidosMock.length + 1
-
-const COLUNAS_PEDIDO = 'id, obra_id, material_id, quantidade, frente, prioridade, status, fornecedor, previsao_entrega, historico, recebimento'
 
 // Banco -> formato que a tela usa (o mesmo do mock).
 function pedidoDoBanco(p) {
@@ -115,7 +116,10 @@ export async function listarPedidos() {
   if (!obraAtualId) return semObra()
   if (USAR_MOCK) return resposta(structuredClone(daObra(pedidosMock, obraAtualId)))
   const r = await doBanco(
-    supabase.from('pedidos_material').select(COLUNAS_PEDIDO).eq('obra_id', obraAtualId).order('created_at'),
+    // Colunas escritas por extenso (não numa constante) para o tests/check-schema.mjs conferir.
+    supabase.from('pedidos_material')
+      .select('id, obra_id, material_id, quantidade, frente, prioridade, status, fornecedor, previsao_entrega, historico, recebimento')
+      .eq('obra_id', obraAtualId).order('created_at'),
     'carregar os pedidos',
   )
   return r.data ? { data: r.data.map(pedidoDoBanco), erro: null } : r
@@ -130,7 +134,9 @@ export async function criarPedido(pedido) {
     return resposta(structuredClone(novo))
   }
   const r = await doBanco(
-    supabase.from('pedidos_material').insert(pedidoParaBanco(pedido)).select(COLUNAS_PEDIDO).single(),
+    supabase.from('pedidos_material').insert(pedidoParaBanco(pedido))
+      .select('id, obra_id, material_id, quantidade, frente, prioridade, status, fornecedor, previsao_entrega, historico, recebimento')
+      .single(),
     'criar o pedido',
   )
   return r.data ? { data: pedidoDoBanco(r.data), erro: null } : r
@@ -149,7 +155,7 @@ export async function salvarPedido(pedido) {
   const r = await doBanco(
     supabase.from('pedidos_material').update(pedidoParaBanco(pedido))
       .eq('id', pedido.id).eq('obra_id', obraAtualId)
-      .select(COLUNAS_PEDIDO),
+      .select('id, obra_id, material_id, quantidade, frente, prioridade, status, fornecedor, previsao_entrega, historico, recebimento'),
     'salvar o pedido',
   )
   if (r.erro) return r

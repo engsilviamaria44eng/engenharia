@@ -59,8 +59,8 @@ Para rodar: peça ao Claude "roda o seed de novo", ou cole no SQL Editor do Supa
 
 ## Histórico das mudanças (migrations, em `supabase/migrations/`)
 
-1. `20261019-obras-e-materiais.sql` — criou as 3 tabelas, as regras e a RLS provisória.
-2. `20261019-grants-exatos.sql` — tirou permissões a mais que o Supabase dava sozinho
+1. `20261019-1-obras-e-materiais.sql` — criou as 3 tabelas, as regras e a RLS provisória.
+2. `20261019-2-grants-exatos.sql` — tirou permissões a mais que o Supabase dava sozinho
    (inclusive apagar) e desligou essa liberação automática para as próximas tabelas.
 
 ## Conferências automáticas (`npm run check`)

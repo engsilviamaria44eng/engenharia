@@ -248,7 +248,7 @@ export default function Materiais() {
     const [rp, rc, rf] = await Promise.all([listarPedidos(), listarCatalogoMateriais(), listarFrentes()])
     const erro = rp.erro || rc.erro || rf.erro
     if (erro) {
-      setEstado({ carregando: false, erro: 'Não foi possível carregar os pedidos de material. Confira a internet e tente de novo.' })
+      setEstado({ carregando: false, erro: `${erro} Confira a internet e tente de novo.` })
       return
     }
     setPedidos(rp.data)

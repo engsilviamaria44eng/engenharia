@@ -85,13 +85,15 @@ git e a Vercel publica sozinha. A pessoa não digita comando.
   migration, só para `authenticated`. Erro 42501 é GRANT faltando, não RLS. Nunca
   `grant all`, nunca `to anon`. **Exceção provisória:** até o Capítulo 15 (Login) o app
   roda sem login, então as tabelas atuais liberam `anon` com políticas `dev_*` e a
-  marca `publico-de-proposito` na migration. Não publicar o app antes de fechar isso.
+  marca `publico-de-proposito` na migration. Essas políticas substituem, por enquanto, a
+  RLS por obra (`minhas_obras()`). Não publicar o app antes de fechar isso.
 - **Banco:** projeto Supabase `fmz-obras` (sa-east-1); conexão no `.env.local`
   (`VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY`, nunca a service_role).
   O mapa do banco e os provisórios estão em `banco-resumo.md` — leia antes de mexer.
 - **Depois de qualquer migration, regenere `tests/_schema-snapshot.json`** (colunas do
   `list_tables`) e atualize o `banco-resumo.md`. Migration nova vira arquivo em
-  `supabase/migrations/` com o mesmo conteúdo aplicado.
+  `supabase/migrations/` com o mesmo conteúdo aplicado, com nome que ordena na sequência
+  em que foi aplicada (`AAAAMMDD-N-assunto.sql`).
 - **Provisórios do back-end:** membros, frentes e login ainda são mock, casados com o
   banco pelo `codigo` da obra; `pedidos_material.frente` é texto (vira `frente_id`).
 - **No Windows, use `npm.cmd`** (e `npx.cmd`) se o PowerShell bloquear o `npm.ps1`.
