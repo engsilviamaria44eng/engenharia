@@ -1,5 +1,5 @@
 // Peças de formulário em folha (painel que sobe de baixo no celular), usadas pelo Planejamento.
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 export function Campo({ rotulo, erro, children, dica }) {
   return (
@@ -13,8 +13,11 @@ export function Campo({ rotulo, erro, children, dica }) {
 }
 
 export function Folha({ titulo, onFechar, children }) {
+  // Guarda sempre o onFechar mais novo: o Esc fecha com o estado de agora, não o da abertura.
+  const fechar = useRef(onFechar)
+  useEffect(() => { fechar.current = onFechar })
   useEffect(() => {
-    const aoTeclar = (e) => { if (e.key === 'Escape') onFechar() }
+    const aoTeclar = (e) => { if (e.key === 'Escape') fechar.current() }
     window.addEventListener('keydown', aoTeclar)
     return () => window.removeEventListener('keydown', aoTeclar)
   }, [])

@@ -156,7 +156,7 @@ export default function AbaLongoPrazo({ irParaEAP }) {
     )
   }
 
-  const obra = resumoDoCronograma(atividades, config, hoje)
+  const totais = resumoDoCronograma(atividades, config, hoje)
   const abrir = (linha, r) => setFolha({ linha, r })
 
   function salvarProgresso(valor) {
@@ -168,9 +168,9 @@ export default function AbaLongoPrazo({ irParaEAP }) {
   return (
     <>
       <div className="resumo">
-        <div className="stat"><span className="rot">Previsto hoje</span><span className="val">{obra.previsto}<small>%</small></span></div>
-        <div className={`stat ${obra.progresso < obra.previsto ? 'verm' : 'verde'}`}><span className="rot">Real</span><span className="val">{obra.progresso}<small>%</small></span></div>
-        <div className={`stat ${obra.atrasadas ? 'verm' : 'verde'}`}><span className="rot">Atrasadas</span><span className="val">{obra.atrasadas}</span></div>
+        <div className="stat"><span className="rot">Previsto hoje</span><span className="val">{totais.previsto}<small>%</small></span></div>
+        <div className={`stat ${totais.progresso < totais.previsto ? 'verm' : 'verde'}`}><span className="rot">Real</span><span className="val">{totais.progresso}<small>%</small></span></div>
+        <div className={`stat ${totais.atrasadas ? 'verm' : 'verde'}`}><span className="rot">Atrasadas</span><span className="val">{totais.atrasadas}</span></div>
       </div>
       {desktop ? (
         <>

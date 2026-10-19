@@ -3,8 +3,8 @@
 // Ciclo de uso: EAP → Longo prazo → Médio prazo → Curto prazo.
 import { useState } from 'react'
 import { PlanejamentoProvider, usePlanejamento } from '../lib/PlanejamentoContext.jsx'
-import { DIAS_SEMANA } from '../lib/planejamento.js'
-import { formatarData } from '../lib/datas.js'
+import { DIAS_SEMANA, validarConfig, resumoDiasUteis } from '../lib/planejamento.js'
+import { formatarData, hojeISO } from '../lib/datas.js'
 import { Campo, Folha, Confirmar } from '../components/formulario.jsx'
 import AbaEAP from './planejamentoEap.jsx'
 import AbaLongoPrazo from './planejamentoLongo.jsx'
@@ -13,19 +13,15 @@ import AbaCurtoPrazo from './planejamentoCurto.jsx'
 
 const ABAS = [['eap', 'EAP'], ['longo', 'Longo prazo'], ['medio', 'Médio prazo'], ['curto', 'Curto prazo']]
 
-function resumoDiasUteis(config) {
-  const dias = DIAS_SEMANA.filter((d) => config.dias_uteis.includes(d.id)).map((d) => d.curto)
-  const n = config.feriados.length
-  return `${dias.join(', ')} · ${n} ${n === 1 ? 'feriado' : 'feriados'}`
-}
 
 function FolhaDiasUteis({ config, onSalvar, onFechar }) {
   const [dias, setDias] = useState(config.dias_uteis)
   const [feriados, setFeriados] = useState(config.feriados)
-  const [novo, setNovo] = useState('')
+  const [novo, setNovo] = useState(hojeISO())
   const [remover, setRemover] = useState(null)
-  const erroDias = dias.length === 0 ? 'Marque pelo menos um dia de trabalho.' : null
-  const erroNovo = novo && feriados.includes(novo) ? 'Este feriado já está na lista.' : null
+  const erros = validarConfig({ dias_uteis: dias, feriados }, novo)
+  const erroDias = erros.dias ?? null
+  const erroNovo = erros.novo ?? null
 
   const alternar = (id) => setDias(dias.includes(id) ? dias.filter((d) => d !== id) : [...dias, id])
 

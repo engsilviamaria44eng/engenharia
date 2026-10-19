@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { usePlanejamento } from '../lib/PlanejamentoContext.jsx'
 import {
-  STATUS_ATIVIDADE, CAUSAS_NAO_REALIZADO, rotuloCausa, semanaDe, atividadesDaSemana, ehAcumulada, ppcDaSemana, causasDaSemana, codigosEAP,
+  STATUS_ATIVIDADE, rotuloStatusAtividade, CAUSAS_NAO_REALIZADO, rotuloCausa, semanaDe, atividadesDaSemana, ehAcumulada, ppcDaSemana, causasDaSemana, codigosEAP,
   temRestricaoAberta, aplicarStatus, validarNaoRealizado, marcarNaoRealizada, desfazerNaoRealizada,
   validarSubtarefa, acrescentarSubtarefa, removerSubtarefa, alternarSubtarefa, subtarefaNaoRealizada, desfazerSubtarefaNaoRealizada,
 } from '../lib/planejamento.js'
@@ -190,7 +190,7 @@ export default function AbaCurtoPrazo({ irParaEAP }) {
   const detalhe = aberta && atividades.find((a) => a.id === aberta)
 
   function mover(a, status) {
-    salvar([aplicarStatus(a, status)], `Movida para ${STATUS_ATIVIDADE.find((s) => s.id === status).rotulo}`)
+    salvar([aplicarStatus(a, status)], `Movida para ${rotuloStatusAtividade(status)}`)
   }
 
   return (

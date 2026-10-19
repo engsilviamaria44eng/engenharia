@@ -2,7 +2,8 @@
 // Node puro: node tests/obras.mjs
 import { escolherObraInicial, daObra, podeTrocarDeObra, chaveObraGuardada } from '../src/lib/obras.js'
 import { definirObraAtual, listarFrentes, listarObrasDoUsuario, listarPedidos, criarPedido, salvarPedido,
-  listarAtividadesPlanejamento, criarAtividadePlanejamento, salvarAtividadesPlanejamento } from '../src/lib/dados.js'
+  listarAtividadesPlanejamento, criarAtividadePlanejamento, salvarAtividadesPlanejamento,
+  lerConfigPlanejamento, salvarConfigPlanejamento } from '../src/lib/dados.js'
 
 let ok = 0
 let tot = 0
@@ -81,6 +82,15 @@ definirObraAtual('obra-ca')
 conferir('Alphaville: nenhuma atividade', (await listarAtividadesPlanejamento()).data, [])
 definirObraAtual(null)
 conferir('sem obra: atividades devolvem erro, nunca todas', (await listarAtividadesPlanejamento()).data, null)
+// dias úteis: cada obra tem a sua configuração
+definirObraAtual('obra-je')
+await salvarConfigPlanejamento({ dias_uteis: [1, 2, 3, 4, 5, 6], feriados: [] })
+definirObraAtual('obra-vn')
+conferir('sábado na JE-01 não muda a VN-02', (await lerConfigPlanejamento()).data.dias_uteis, [1, 2, 3, 4, 5])
+definirObraAtual('obra-je')
+conferir('JE-01 guarda o próprio sábado', (await lerConfigPlanejamento()).data.dias_uteis, [1, 2, 3, 4, 5, 6])
+definirObraAtual(null)
+conferir('sem obra: configuração devolve erro', (await lerConfigPlanejamento()).data, null)
 
 // Cada pessoa só vê as obras em que trabalha
 conferir('engenheiro vê as 3 obras', (await listarObrasDoUsuario('u-eng')).data.length, 3)

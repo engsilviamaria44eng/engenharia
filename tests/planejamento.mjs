@@ -7,6 +7,7 @@ import {
   acrescentarRestricao, moverRestricao, podeVoltarSemana, marcarResolvida,
   semanaDe, ehAcumulada, ppcDaSemana, aplicarStatus, validarNaoRealizado, marcarNaoRealizada, desfazerNaoRealizada,
   validarSubtarefa, acrescentarSubtarefa, removerSubtarefa, alternarSubtarefa, subtarefaNaoRealizada, desfazerSubtarefaNaoRealizada, causasDaSemana,
+  validarConfig, resumoDiasUteis,
 } from '../src/lib/planejamento.js'
 import { ATIVIDADES_PLANEJAMENTO } from '../src/lib/mockData.js'
 
@@ -231,6 +232,13 @@ const comCausas = planejadasJE.map((a) => (a.id === 'at-09' ? hidrNR : a.id === 
 conferir('causas da semana, mais frequente primeiro', causasDaSemana(comCausas, semAtual), [{ causa: 'clima', rotulo: 'Clima (chuva)', vezes: 2 }])
 conferir('causas de outra semana não entram', causasDaSemana(planejadasJE, semAtual), [])
 conferir('na semana passada aparecem as da laje', causasDaSemana(je, semanaDe('2026-10-12')), [{ causa: 'material', rotulo: 'Falta de material', vezes: 2 }])
+
+// ---------- configuração e casos de borda ----------
+conferir('config padrão é válida', validarConfig(cfg), {})
+conferir('sem nenhum dia útil é recusado', validarConfig({ dias_uteis: [], feriados: [] }).dias, 'Marque pelo menos um dia de trabalho.')
+conferir('feriado repetido é recusado', validarConfig(cfg, '2026-11-02').novo, 'Este feriado já está na lista.')
+conferir('resumo dos dias úteis', resumoDiasUteis(cfg), 'Seg, Ter, Qua, Qui, Sex · 5 feriados')
+conferir('escala com fim antes do início não quebra', escalaDoCronograma('2026-10-21', '2026-10-01', 'semana').colunas.length, 1)
 
 console.log(`${ok}/${tot} — planejamento`)
 if (ok !== tot) process.exit(1)

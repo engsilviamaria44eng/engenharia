@@ -95,7 +95,8 @@ export const PEDIDOS = [
 // Uma lista só de atividades por obra, usada pelas 4 abas (EAP, longo, médio e curto prazo).
 // Hoje dos exemplos = segunda 19/10/2026; semana atual = 19/10 a 23/10.
 // JE-01: 4 grupos e 9 atividades; 2 concluídas nesta semana (o PPC já aparece), 1 acumulada
-// (laje, devia ter terminado em 16/10; ficou como não realizada na semana passada, por\n// falta de material) e 2 impedidas por restrição aberta.
+// (laje, devia ter terminado em 16/10; ficou como não realizada na semana passada, por
+// falta de material) e 2 impedidas por restrição aberta.
 // VN-02: poucos registros (1 grupo, 3 atividades). CA-03 (parada): nenhuma, para a tela vazia.
 // Restrição: { id, descricao, tipo, prazo, responsavel, semana (segunda-feira), resolvida }.
 // Subtarefa: { id, texto, feita, nao_realizado }. nao_realizado: null ou { causa, obs }.

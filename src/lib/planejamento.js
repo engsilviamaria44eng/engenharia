@@ -28,6 +28,21 @@ export const STATUS_ATIVIDADE = [
   { id: 'concluido', rotulo: 'Concluído' },
 ]
 
+// Dias úteis da obra: pelo menos um dia de trabalho; feriado não se repete.
+export function validarConfig(config, novoFeriado = '') {
+  const erros = {}
+  if (config.dias_uteis.length === 0) erros.dias = 'Marque pelo menos um dia de trabalho.'
+  if (novoFeriado && config.feriados.includes(novoFeriado)) erros.novo = 'Este feriado já está na lista.'
+  return erros
+}
+
+// "Seg, Ter, Qua, Qui, Sex · 5 feriados"
+export function resumoDiasUteis(config) {
+  const dias = DIAS_SEMANA.filter((d) => config.dias_uteis.includes(d.id)).map((d) => d.curto)
+  const n = config.feriados.length
+  return `${dias.join(', ')} · ${n} ${n === 1 ? 'feriado' : 'feriados'}`
+}
+
 export function rotuloStatusAtividade(id) {
   return STATUS_ATIVIDADE.find((s) => s.id === id)?.rotulo ?? id
 }
@@ -225,6 +240,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
 // A régua do cronograma: colunas por semana (começam na segunda) ou por mês,
 // cobrindo de `inicio` a `fim`. Cada coluna diz em que dia começa e quantos dias tem.
 export function escalaDoCronograma(inicio, fim, modo) {
+  if (fim < inicio) fim = inicio
   const colunas = []
   if (modo === 'semana') {
     for (let d = segundaDaSemana(inicio); d <= fim; d = somarDias(d, 7)) {

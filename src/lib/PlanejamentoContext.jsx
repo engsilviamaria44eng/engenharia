@@ -54,12 +54,14 @@ export function PlanejamentoProvider({ children }) {
   // Grava uma ou várias atividades já alteradas (a regra da mudança vem de lib/planejamento.js).
   async function salvar(alteradas, mensagem) {
     if (alteradas.length === 0) return
-    const antes = new Map(atividades.map((a) => [a.id, a]))
     const novas = new Map(alteradas.map((a) => [a.id, a]))
+    const antes = new Map(atividades.filter((a) => novas.has(a.id)).map((a) => [a.id, a]))
     setAtividades((lista) => lista.map((a) => novas.get(a.id) ?? a))
     const { erro } = await salvarAtividadesPlanejamento(alteradas)
     if (erro) {
-      setAtividades((lista) => lista.map((a) => (novas.has(a.id) ? antes.get(a.id) : a)))
+      // Desfaz só o que ainda está como esta gravação deixou: outra mudança feita
+      // depois (e já gravada) não é apagada.
+      setAtividades((lista) => lista.map((a) => (novas.get(a.id) === a ? antes.get(a.id) : a)))
       setAviso(`Não foi possível salvar: ${erro}`)
       return
     }
