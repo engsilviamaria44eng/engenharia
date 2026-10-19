@@ -54,3 +54,39 @@ export const FRENTES = [
   { id: 'f-muro', obra_id: 'obra-vn', servico: 'Muro de divisa', ambiente: 'Área externa', responsavel: 'Equipe própria', avanco: 0, dias_sem_andar: 8, data_limite: '2026-10-28', folga: 10, parada: false, status: 'Não iniciada' },
   { id: 'f-contra', obra_id: 'obra-vn', servico: 'Contrapiso', ambiente: 'Térreo', responsavel: 'Equipe própria', avanco: 70, dias_sem_andar: 1, data_limite: '2026-11-02', folga: 15, parada: false, status: 'Em andamento' },
 ]
+
+// ---------- MATERIAIS (Kanban de pedidos) ----------
+// Catálogo da empresa: vale para todas as obras (é cadastro, não lançamento).
+export const MATERIAIS_CATALOGO = [
+  { id: 'm-cimento', nome: 'Cimento CP-II 50 kg', unidade: 'saco', categoria: 'grosso' },
+  { id: 'm-areia', nome: 'Areia média', unidade: 'm³', categoria: 'grosso' },
+  { id: 'm-brita', nome: 'Brita 1', unidade: 'm³', categoria: 'grosso' },
+  { id: 'm-bloco', nome: 'Bloco cerâmico 14x19x39', unidade: 'un', categoria: 'grosso' },
+  { id: 'm-vergalhao', nome: 'Vergalhão CA-50 10 mm', unidade: 'barra', categoria: 'grosso' },
+  { id: 'm-argamassa', nome: 'Argamassa AC-II 20 kg', unidade: 'saco', categoria: 'acabamento' },
+  { id: 'm-porcelanato', nome: 'Porcelanato 60x60 acetinado', unidade: 'm²', categoria: 'acabamento' },
+  { id: 'm-tinta', nome: 'Tinta acrílica fosca branca 18 L', unidade: 'lata', categoria: 'acabamento' },
+  { id: 'm-rejunte', nome: 'Rejunte flexível cinza', unidade: 'kg', categoria: 'acabamento' },
+  { id: 'm-fio', nome: 'Fio flexível 2,5 mm² (rolo 100 m)', unidade: 'rolo', categoria: 'instalacoes' },
+  { id: 'm-eletroduto', nome: 'Eletroduto corrugado 25 mm (rolo 50 m)', unidade: 'rolo', categoria: 'instalacoes' },
+  { id: 'm-tubo', nome: 'Tubo PVC esgoto 100 mm (barra 6 m)', unidade: 'barra', categoria: 'instalacoes' },
+]
+
+// Pedidos: cada um é um lote de material numa obra. Hoje dos exemplos = 19/10/2026.
+// JE-01: 9 pedidos em todas as colunas, 2 críticos, 1 atrasado (vergalhão), 1 com
+// alerta de recebimento (cimento com sacos rasgados) e 2 entregues.
+// VN-02: 2 pedidos. CA-03 (parada): nenhum, para a tela vazia.
+const sem = { qtd_bate_nf: null, estado_ok: null, avarias: '', foto_nf: '' }
+export const PEDIDOS = [
+  { id: 'pd-01', obra_id: 'obra-je', material_id: 'm-cimento', quantidade: 50, frente: 'Laje do 2º pavimento', prioridade: 'critico', status: 'solicitar', fornecedor: '', previsao_entrega: '', historico: [{ status: 'solicitar', data: '2026-10-17' }], recebimento: { ...sem } },
+  { id: 'pd-02', obra_id: 'obra-je', material_id: 'm-fio', quantidade: 6, frente: 'Instalações elétricas — tubulação', prioridade: 'normal', status: 'solicitar', fornecedor: '', previsao_entrega: '', historico: [{ status: 'solicitar', data: '2026-10-18' }], recebimento: { ...sem } },
+  { id: 'pd-03', obra_id: 'obra-je', material_id: 'm-bloco', quantidade: 3000, frente: 'Alvenaria 2º pavimento', prioridade: 'normal', status: 'cotacao', fornecedor: '', previsao_entrega: '', historico: [{ status: 'solicitar', data: '2026-10-10' }, { status: 'cotacao', data: '2026-10-13' }], recebimento: { ...sem } },
+  { id: 'pd-04', obra_id: 'obra-je', material_id: 'm-eletroduto', quantidade: 8, frente: 'Instalações elétricas — tubulação', prioridade: 'normal', status: 'cotacao', fornecedor: '', previsao_entrega: '', historico: [{ status: 'solicitar', data: '2026-10-14' }, { status: 'cotacao', data: '2026-10-15' }], recebimento: { ...sem } },
+  { id: 'pd-05', obra_id: 'obra-je', material_id: 'm-vergalhao', quantidade: 80, frente: 'Laje do 2º pavimento', prioridade: 'critico', status: 'comprado', fornecedor: 'Aço Forte Distribuidora', previsao_entrega: '2026-10-15', historico: [{ status: 'solicitar', data: '2026-10-01' }, { status: 'cotacao', data: '2026-10-03' }, { status: 'comprado', data: '2026-10-07' }], recebimento: { ...sem } },
+  { id: 'pd-06', obra_id: 'obra-je', material_id: 'm-areia', quantidade: 12, frente: 'Reboco interno', prioridade: 'normal', status: 'comprado', fornecedor: 'Areial São Jorge', previsao_entrega: '2026-10-22', historico: [{ status: 'solicitar', data: '2026-10-08' }, { status: 'cotacao', data: '2026-10-09' }, { status: 'comprado', data: '2026-10-12' }], recebimento: { ...sem } },
+  { id: 'pd-07', obra_id: 'obra-je', material_id: 'm-cimento', quantidade: 40, frente: 'Alvenaria 2º pavimento', prioridade: 'normal', status: 'almoxarifado', fornecedor: 'Casa do Construtor Centro', previsao_entrega: '2026-10-11', historico: [{ status: 'solicitar', data: '2026-09-30' }, { status: 'cotacao', data: '2026-10-02' }, { status: 'comprado', data: '2026-10-06' }, { status: 'almoxarifado', data: '2026-10-11' }], recebimento: { qtd_bate_nf: true, estado_ok: false, avarias: '3 sacos rasgados na descarga', foto_nf: '' } },
+  { id: 'pd-08', obra_id: 'obra-je', material_id: 'm-brita', quantidade: 8, frente: 'Laje do 2º pavimento', prioridade: 'normal', status: 'entregue', fornecedor: 'Pedreira Boa Vista', previsao_entrega: '2026-09-20', historico: [{ status: 'solicitar', data: '2026-09-10' }, { status: 'cotacao', data: '2026-09-12' }, { status: 'comprado', data: '2026-09-15' }, { status: 'almoxarifado', data: '2026-09-19' }, { status: 'entregue', data: '2026-09-22' }], recebimento: { qtd_bate_nf: true, estado_ok: true, avarias: '', foto_nf: '' } },
+  { id: 'pd-09', obra_id: 'obra-je', material_id: 'm-argamassa', quantidade: 30, frente: 'Reboco interno', prioridade: 'normal', status: 'entregue', fornecedor: 'Casa do Construtor Centro', previsao_entrega: '2026-09-28', historico: [{ status: 'solicitar', data: '2026-09-20' }, { status: 'cotacao', data: '2026-09-22' }, { status: 'comprado', data: '2026-09-24' }, { status: 'almoxarifado', data: '2026-09-29' }, { status: 'entregue', data: '2026-10-02' }], recebimento: { qtd_bate_nf: true, estado_ok: true, avarias: '', foto_nf: '' } },
+  { id: 'pd-10', obra_id: 'obra-vn', material_id: 'm-cimento', quantidade: 30, frente: 'Muro de divisa', prioridade: 'normal', status: 'solicitar', fornecedor: '', previsao_entrega: '', historico: [{ status: 'solicitar', data: '2026-10-16' }], recebimento: { ...sem } },
+  { id: 'pd-11', obra_id: 'obra-vn', material_id: 'm-bloco', quantidade: 1500, frente: 'Alvenaria', prioridade: 'normal', status: 'comprado', fornecedor: 'Cerâmica Vale Verde', previsao_entrega: '2026-10-24', historico: [{ status: 'solicitar', data: '2026-10-05' }, { status: 'cotacao', data: '2026-10-07' }, { status: 'comprado', data: '2026-10-10' }], recebimento: { ...sem } },
+]

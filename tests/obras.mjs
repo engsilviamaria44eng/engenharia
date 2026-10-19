@@ -1,7 +1,7 @@
 // Regra multi-obra: em qual obra o app abre, e que nenhum dado de outra obra vaza.
 // Node puro: node tests/obras.mjs
 import { escolherObraInicial, daObra, podeTrocarDeObra, chaveObraGuardada } from '../src/lib/obras.js'
-import { definirObraAtual, listarFrentes, listarObrasDoUsuario } from '../src/lib/dados.js'
+import { definirObraAtual, listarFrentes, listarObrasDoUsuario, listarPedidos, criarPedido, salvarPedido } from '../src/lib/dados.js'
 
 let ok = 0
 let tot = 0
@@ -50,6 +50,21 @@ definirObraAtual('obra-ca')
 conferir('Alphaville (parada, sem frentes): lista vazia', (await listarFrentes()).data, [])
 definirObraAtual(null)
 conferir('sem obra escolhida: erro, nunca a lista de todas', (await listarFrentes()).data, null)
+
+// Materiais: pedidos também não vazam entre obras, e nada é salvo na obra errada
+definirObraAtual('obra-je')
+const pje = (await listarPedidos()).data
+conferir('JE-01: só pedidos do Jardim Europa', pje.length > 0 && pje.every((p) => p.obra_id === 'obra-je'), true)
+definirObraAtual('obra-vn')
+const pvn = (await listarPedidos()).data
+conferir('VN-02: só pedidos da Vila Nova', pvn.length > 0 && pvn.every((p) => p.obra_id === 'obra-vn'), true)
+const criado = (await criarPedido({ material_id: 'm-areia', quantidade: 2, status: 'solicitar', historico: [] })).data
+conferir('pedido novo nasce na obra aberta', criado.obra_id, 'obra-vn')
+conferir('salvar um pedido de outra obra é recusado', (await salvarPedido({ ...pje[0], status: 'entregue' })).data, null)
+definirObraAtual('obra-ca')
+conferir('Alphaville: nenhum pedido', (await listarPedidos()).data, [])
+definirObraAtual(null)
+conferir('sem obra: pedidos devolvem erro, nunca todos', (await listarPedidos()).data, null)
 
 // Cada pessoa só vê as obras em que trabalha
 conferir('engenheiro vê as 3 obras', (await listarObrasDoUsuario('u-eng')).data.length, 3)

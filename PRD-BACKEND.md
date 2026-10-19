@@ -246,7 +246,36 @@ A tabela mais importante: é dela que saem o ritmo, os dias sem andar e a data l
 | frente_id | uuid | sim | (diario_id, frente_id) é único |
 | avanco_acumulado | numeric(5,2) | sim | CHECK entre 0 e 100 |
 | concluido | boolean | sim | padrão falso. Se verdadeiro, avanco_acumulado = 100 |
+| detalhe_dia | text | não | "Detalhe do dia" escrito no diário (ex.: "só a parede da escada"). Nunca altera o texto do orçamento |
 | created_at | timestamptz | sim | |
+
+## Tabela `diario_atividades` — atividades fora do orçamento (e item sem frente)
+
+O que foi feito no dia e **não** é uma frente: um serviço que não existe no orçamento, ou um item do orçamento que ainda não tem frente. Fica separada de `diario_avancos` de propósito: o ritmo, os dias sem andar e a data limite do Painel continuam saindo só das frentes.
+
+| Campo | Tipo | Obrigatório | Observação |
+|---|---|---|---|
+| id | uuid | sim | |
+| obra_id | uuid | sim | |
+| diario_id | uuid | sim | |
+| origem | text | sim | CHECK: `Fora do orçamento`, `Item sem frente` |
+| orcamento_item_id | uuid | só `Item sem frente` | o item escolhido na busca. Também preenchido quando uma atividade fora do orçamento é "ligada a um item" |
+| descricao | text | só `Fora do orçamento` | texto livre digitado no diário |
+| ambiente_id | uuid | não | |
+| quantidade | numeric(14,4) | não | > 0 |
+| unidade | text | não | |
+| detalhe_dia | text | não | |
+| situacao | text | sim | CHECK: `Para analisar`, `Ligada a item`, `Serviço extra`. Padrão: `Para analisar` |
+| created_at | timestamptz | sim | |
+
+**Regras:**
+- `Fora do orçamento` exige `descricao`; `Item sem frente` exige `orcamento_item_id`.
+- **Quem cria:** mestre (no dia) e engenheiro (qualquer dia, inclusive diário atrasado). Confirmado pelo engenheiro em 19/10/2026: o mestre lança, o engenheiro analisa depois.
+- **Quem edita a descrição:** o mestre, só no dia; o engenheiro, sempre.
+- **Só o engenheiro muda `situacao`.**
+- **"Ligar a um item"** grava `orcamento_item_id` e `situacao = Ligada a item`. Se o item tiver frente, o engenheiro pode lançar o avanço nela.
+- **Mesmas permissões e mesmo `obra_id` injetado** dos outros dados do diário. O cliente não vê.
+- `diario_efetivo` e `fotos` podem apontar para uma atividade (coluna `diario_atividade_id`, alternativa a `diario_avanco_id`/`frente_id`): a equipe e as fotos de um serviço fora do orçamento ficam registradas do mesmo jeito.
 
 **Índices úteis:** (frente_id, diario_id).
 **Regras de negócio:**
@@ -567,6 +596,9 @@ Permissões: só o engenheiro da obra vê. Ninguém edita nem apaga pela tela (�
 - [ ] Um diário com data futura, ou antes do início da obra, é recusado pelo banco.
 - [ ] Num diário atrasado, um avanço maior que o do diário seguinte da mesma frente é recusado.
 - [ ] Um diário atrasado de agosto não reabre uma frente marcada como Concluída em setembro.
+- [ ] Uma atividade `Fora do orçamento` sem descrição é recusada; uma `Item sem frente` sem item é recusada.
+- [ ] O mestre cria uma atividade fora do orçamento no dia, mas não consegue mudar a `situacao` dela.
+- [ ] Atividades fora do orçamento não entram no ritmo nem na data limite do Painel.
 - [ ] Logado como cliente, consultar `frentes`, `diarios`, `diario_avancos`, `empreiteiros` ou `frentes_valores` devolve zero linhas.
 - [ ] O cliente lê `fotos` e recebe só as liberadas. Tentar abrir o arquivo de uma foto não liberada falha.
 - [ ] A função do resumo devolve o avanço por ambiente para o cliente da obra e recusa a mesma chamada para outra obra.

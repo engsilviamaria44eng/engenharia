@@ -38,7 +38,7 @@ O mestre lança o diário pelo celular, no canteiro: o que andou em cada frente,
 - **Montar** orçamento ou composição de preço: isso continua no seu programa de orçamento. O sistema **importa o orçamento analítico pronto**, mostra e usa os serviços dele, mas não serve para orçar (decisão do engenheiro, 18/10/2026).
 - Importar o arquivo do MS Project: na v1 as frentes e as datas são cadastradas no sistema. Importar ficaria para a v2.
 - Pagamento de empreiteiro ou financeiro da obra: o sistema mede, mas não paga.
-- Materiais por frente (levantamento, pedido e entrega): ficou para a v2, por decisão do engenheiro.
+- ~~Materiais por frente: ficou para a v2~~ → **antecipado em 19/10/2026 (decisão do engenheiro)** numa versão simples: o **Kanban de pedidos de material** (aba "Materiais" dentro de Orçamento), só para o engenheiro. Os logins do almoxarife e da compradora continuam na v2.
 - Mandar mensagens pelo WhatsApp ou ler o WhatsApp dos empreiteiros (eles continuam só no WhatsApp, e o sistema não se liga a ele).
 
 ## Funcionalidades
@@ -427,7 +427,14 @@ Também fica separada pelo mesmo motivo: o cliente vê a linha da obra, mas nunc
 | avanco_acumulado | numeric | sim | % total da frente depois do dia (0–100) |
 | concluido | boolean | sim | "serviço concluído" |
 
-É desta tabela que saem o ritmo real, os dias sem andar e a data limite. Ela é a mais importante do sistema.
+É desta tabela que saem o ritmo real, os dias sem andar e a data limite. Ela é a mais importante do sistema. Ganhou o campo `detalhe_dia` (texto livre do que foi feito naquele dia).
+
+### `diario_atividades` — serviço feito fora do orçamento (pedido pelo engenheiro, 19/10/2026)
+No diário, os serviços são **puxados do orçamento** (frentes, agrupadas por etapa, e "Buscar no orçamento"). Quando o serviço não está no orçamento, ele entra aqui com **descrição digitada**, quantidade e unidade opcionais, e a mesma equipe e fotos.
+- **Quem lança:** o mestre (no dia, pelo celular) e o engenheiro (confirmado). **Quem analisa:** só o engenheiro.
+- Fica "Para analisar" até o engenheiro escolher: **ligar a um item** do orçamento ou **marcar como serviço extra**, que é candidato a aditivo e entra em "onde foi o lucro?".
+- Um item do orçamento ainda sem frente, achado na busca, também entra aqui ("Item sem frente"), e o engenheiro é avisado para criar a frente.
+- **O texto do orçamento nunca é alterado pelo diário.** O "detalhe do dia" é só do lançamento.
 
 ### `diario_efetivo` — mão de obra por função (pedido pelo engenheiro)
 | Campo | Tipo | Obrigatório | Observação |
@@ -491,7 +498,7 @@ Assim, **item a item do orçamento**, dá para ver **orçado × contratado × me
 
 ## Melhorias para a v2
 
-- Materiais por frente, com login do almoxarife e da compradora: cortado por decisão do engenheiro, para a v1 sair mais rápido. **Ficou mais fácil:** o levantamento já sai da composição do orçamento, e a v2 só precisa acrescentar pedido, entrega e custo real.
+- Login do almoxarife e da compradora no módulo de materiais (o Kanban de pedidos já existe desde 19/10/2026, só para o engenheiro). Ligar o pedido ao levantamento da composição do orçamento e ao custo real. **Ficou mais fácil:** o levantamento já sai da composição do orçamento, e a v2 só precisa acrescentar pedido, entrega e custo real.
 - Importar o cronograma do MS Project: cortado porque, na v1, cadastrar as frentes é mais rápido do que fazer um importador.
 - Medição e Portal do cliente: entram logo depois do Primeiro pedaço, em cima das mesmas tabelas.
 

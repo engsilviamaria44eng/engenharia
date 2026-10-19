@@ -200,6 +200,63 @@ button:active{opacity:.82}
 .dados div b{font-size:17px;font-weight:600}
 .app[data-desktop="1"] .dados{grid-template-columns:1fr 1fr}
 
+/* ---------- abas e filtros em pílula ---------- */
+.abas-tela,.barra-acoes{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip-filtro{min-height:44px;padding:0 16px;border-radius:999px;border:2px solid var(--linha);background:#fff;font-size:15px;font-weight:600;color:var(--texto-2)}
+.chip-filtro:hover{border-color:var(--pri)}
+.chip-filtro.ativo{background:var(--pri);border-color:var(--pri);color:#fff}
+.pill.azul{background:var(--pri-claro);color:var(--pri)}
+.pill.atencao{background:var(--fundo-ocre);color:var(--ocre-texto)}
+
+/* ---------- MATERIAIS: kanban de pedidos ---------- */
+.kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.coluna{flex:0 0 min(86vw,300px);scroll-snap-align:start;background:#E6ECF2;border-radius:var(--raio);padding:8px;display:flex;flex-direction:column;gap:8px;align-self:flex-start}
+.coluna-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 6px}
+.coluna-cab .contagem{background:#fff}
+.coluna-vazia{font-size:14px;color:var(--texto-2);padding:8px 6px 12px}
+.app[data-desktop="1"] .coluna{flex:1 1 0;min-width:220px}
+.app[data-desktop="1"] .so-celular{display:none}
+.pedido{background:var(--cartao);border-radius:var(--raio);box-shadow:var(--sombra);padding:12px;display:flex;flex-direction:column;gap:6px;border-left:5px solid transparent}
+.pedido.atrasado{border-left-color:var(--vermelho);background:var(--fundo-verm)}
+.pedido-topo{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.pedido-topo b{font-size:16px;line-height:1.3}
+.pedido-topo .tag{min-width:0;font-size:12px;padding:3px 8px}
+.pedido-qtd{font-size:20px;font-weight:700}
+.pedido-frente{font-size:15px;color:var(--texto-2)}
+.pedido-info{font-size:14px;color:var(--texto-2)}
+.pedido-info b{color:var(--texto)}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pedido-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.btn-mini{min-height:44px;padding:0 12px;border-radius:var(--raio);border:2px solid var(--linha);background:#fff;font-size:14px;font-weight:600;color:var(--texto-2)}
+.btn-mini.pri{flex:1;border-color:var(--pri);background:var(--pri);color:#fff}
+.btn-mini.pri:hover{background:var(--pri-escuro)}
+
+/* ---------- formulários nas folhas ---------- */
+.folha-form{padding-left:16px;padding-right:16px}
+.folha-form h3{padding-left:0;padding-right:0}
+.form{display:flex;flex-direction:column;gap:14px;padding-bottom:4px}
+.form-sub{font-size:15px;color:var(--texto-2);margin:-4px 0 12px}
+.campo{display:flex;flex-direction:column;gap:6px}
+.campo-rot{font-size:15px;font-weight:600}
+.campo input[type=text],.campo input[type=number],.campo input[type=date],.campo select,.campo textarea{min-height:48px;border:2px solid var(--linha);border-radius:var(--raio);padding:8px 12px;font:inherit;background:#fff;color:var(--texto);width:100%}
+.campo textarea{min-height:88px;resize:vertical}
+.campo input:focus,.campo select:focus,.campo textarea:focus{outline:none;border-color:var(--pri)}
+.campo-dica{font-size:14px;color:var(--texto-2)}
+.campo-erro{font-size:14px;font-weight:600;color:var(--verm-forte)}
+.sim-nao{display:flex;gap:8px}
+.sim-nao button{flex:1;min-height:48px;border:2px solid var(--linha);border-radius:var(--raio);background:#fff;font-weight:700}
+.sim-nao button.ativo.sim{border-color:var(--pri);background:var(--pri-claro);color:var(--pri)}
+.sim-nao button.ativo.nao{border-color:var(--vermelho);background:var(--fundo-verm);color:var(--verm-forte)}
+.alerta-form{font-size:14px;background:var(--fundo-ocre);color:var(--ocre-texto);border-radius:var(--raio);padding:8px 12px}
+.foto-nf{max-width:100%;max-height:220px;border-radius:var(--raio);margin-top:6px;object-fit:contain;background:var(--fundo)}
+.form-acoes{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.form-acoes .btn{flex:1}
+.app[data-desktop="1"] .form-acoes .btn{flex:0 0 auto}
+
+/* ---------- aviso rápido ---------- */
+.aviso-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + var(--seguro-inf));background:var(--escuro);color:#fff;padding:12px 18px;border-radius:var(--raio);font-weight:600;z-index:30;max-width:calc(100% - 32px);text-align:center;box-shadow:0 4px 12px rgba(11,34,54,.25)}
+.app[data-desktop="1"] .aviso-toast{bottom:24px}
+
 @media (max-width:380px){
   .stat .val{font-size:26px}
   .entrega .data{font-size:34px}

@@ -296,6 +296,33 @@ Modo "Por medidas" sem nenhum item com composição: "Nenhum serviço do orçame
 
 ---
 
+## Tela: Materiais — Kanban de pedidos (construída em 19/10/2026)
+
+**Quem acessa:** Engenheiro. **Chega aqui por:** a aba "Materiais" do Orçamento.
+**Código:** `src/screens/materiais.jsx`; regras em `src/lib/materiais.js` (teste em `tests/materiais.mjs`); dados por `src/lib/dados.js` (`listarPedidos`, `criarPedido`, `salvarPedido`, `listarCatalogoMateriais`), com o `obra_id` injetado.
+
+- **O que é:** cada cartão é um pedido (lote) de material, não um item de estoque. 5 colunas: `Solicitar` → `Em cotação` → `Comprado / a caminho` → `No almoxarifado` → `Entregue na frente`. A última só aparece com o filtro "Ver entregues (n)".
+- **Contadores:** Em cotação · Chegando esta semana (comprado, com previsão nos próximos 7 dias) · Atrasados (comprado com previsão vencida).
+- **Cartão:**
+  - material e quantidade com a unidade no plural ("50 sacos");
+  - a frente;
+  - pílulas: `Crítico` (vermelho), `Material grosso` (azul), `Acabamento`/`Instalações` (verde) e `Conferir recebimento` (amarelo);
+  - fornecedor e previsão;
+  - "há X dias nesta coluna" e o **lead time** (dias de Solicitar até o almoxarifado);
+  - **Atrasado**: fundo e faixa vermelhos, com a etiqueta.
+- **Novo pedido** (4 campos): material (catálogo por categoria), quantidade (teclado numérico, maior que zero), frente (as frentes abertas da obra) e prioridade (Normal/Crítico). Entra em Solicitar.
+- **Mover por botões** ("Mover para…" e "Voltar"):
+  - **Comprado** pede fornecedor e previsão (a data nasce com hoje);
+  - **Almoxarifado** abre o checklist: quantidade bate com a NF? material em perfeito estado? (sim/não, obrigatórios), avarias e foto da NF com prévia. Um "não" marca o cartão com alerta;
+  - **Entregue** confirma a frente e tira o cartão do quadro ativo.
+- **Histórico:** toda mudança grava `{status, data}`, que é de onde saem o tempo na coluna e o lead time.
+- **Interação:** tudo otimista, ou seja, a tela muda na hora e desfaz com aviso se der erro.
+- **Estados:** carregando, vazio ("Nenhum pedido de material nesta obra", com o botão Novo pedido), erro (com "Tentar de novo") e sucesso.
+- **No celular:** as colunas rolam para o lado.
+- **Ainda não tem:** login do almoxarifado e da compradora, custo do pedido e ligação com o levantamento da composição (v2).
+
+---
+
 ## Tela: Item do orçamento
 
 **Quem acessa:** Engenheiro.
@@ -360,7 +387,12 @@ Um formulário de uma coluna só, com botões grandes, feito para o celular em p
 
 1. **Data:** hoje, fixa para o mestre. Para o engenheiro, há o seletor **"Data do diário"**, que começa em hoje e aceita **qualquer dia desde o início da obra**, inclusive meses atrás (ver "Diário atrasado", abaixo). Quando a data não é hoje, aparece uma faixa amarela no topo: "Diário de {data} · lançado com atraso". Se aquele dia já tem diário, a tela abre com ele preenchido.
 2. **Clima por período:** três linhas, **Manhã**, **Tarde** e **Noite**, cada uma com quatro botões grandes (`Sol`, `Nublado`, `Chuva`, `Chuva forte`) e o valor escolhido escrito ao lado do nome do período. Tocar de novo no botão marcado desmarca. Cada período é opcional e aparece como "não informado".
-3. **Frentes trabalhadas hoje:** a lista das frentes em andamento e das não iniciadas. Para cada frente que o mestre tocar, abrem:
+3. **Serviços do dia, puxados do orçamento** (pedido pelo engenheiro, 19/10/2026):
+   - A lista vem do **orçamento da obra**: as frentes em andamento e as não iniciadas, agrupadas pela etapa do orçamento e mostrando o código e a descrição do item (ex.: "4.1 · Alvenaria de vedação — Alvenaria 2º pavimento"). Ninguém digita o nome do serviço.
+   - **"Buscar no orçamento":** um campo de busca por código ou palavra, para achar qualquer item do orçamento. Se o item já tem frente, ela entra na lista. Se ainda não tem, o lançamento entra como atividade **"Item sem frente"**, já ligada àquele item, e o engenheiro recebe o aviso para criar a frente. O mestre nunca cria frente.
+   - **"+ Atividade fora do orçamento":** para o serviço que **não existe no orçamento** (ex.: "Demolição de mureta não prevista"). Pede a **descrição** (obrigatória, texto livre), o ambiente, a quantidade e a unidade (opcionais) e, como nos outros serviços, o efetivo por função e as fotos. Aparece na lista do dia com a etiqueta amarela **"Fora do orçamento"**.
+   - **Editar a atividade do dia:** todo serviço, puxado do orçamento ou não, tem o campo **"Detalhe do dia"** (opcional), para escrever o que exatamente foi feito (ex.: "só a parede da escada"). O texto do orçamento **nunca** é alterado pelo diário. A atividade fora do orçamento pode ter a descrição editada no mesmo dia (o mestre) ou a qualquer momento (o engenheiro).
+   Para cada serviço da lista que o mestre tocar, abrem:
    - o avanço acumulado, com um deslizador de 0 a 100 de 5 em 5 e um campo numérico ao lado. O valor começa no último avanço lançado;
    - o **efetivo por função**: uma lista com as principais funções de mão de obra, cada uma com os botões − e +, e o total de pessoas somado no título. As funções são, nesta ordem: Pedreiro, Servente, Carpinteiro, Armador, Eletricista, Encanador, Pintor, Gesseiro, Azulejista, Serralheiro, Soldador, Impermeabilizador, Operador de máquinas e Encarregado. As que têm quantidade aparecem destacadas. Embaixo, o campo **"Outra função"** com o botão "+ Acrescentar": a função nova entra na lista daquela obra (com a etiqueta "nova") e passa a aparecer nas próximas frentes e nos próximos dias;
    - a caixa "Serviço concluído". Marcar essa caixa leva o avanço para 100%.
@@ -424,6 +456,10 @@ No topo, dois botões: **"Lançar hoje"** e **"Gerar PDF"**. Abaixo, a lista de 
 **Ações**
 - **Tocar num dia:** abre o Dia do diário.
 - **Lançar (engenheiro):** abre Lançar hoje, com a escolha da data.
+- **Atividades fora do orçamento (engenheiro):** um aviso no topo, por exemplo "3 atividades fora do orçamento para analisar · Ver", abre a lista delas (data, descrição, quantidade, quem lançou). Para cada uma, o engenheiro escolhe:
+  - **"Ligar a um item do orçamento"**: era um serviço previsto com outro nome, e o avanço passa a contar no item;
+  - **"Marcar como serviço extra"**: não estava no contrato, é candidato a aditivo e conta na pergunta "onde foi o lucro?".
+  Enquanto não decide, ela fica como "Para analisar".
 - **Dias sem diário (engenheiro):** um aviso no topo da lista, por exemplo "38 dias úteis sem diário desde o início da obra · Ver", abre a lista desses dias por mês (agosto: 2, 3, 9…), cada um com o botão **"Lançar"**, que abre o formulário já naquela data. Na conta entram segunda a sábado. `[DESCOBRIR NO USO: se sábado conta como dia de obra]`
 - **Etiqueta "Lançado em {data}"** nas linhas de diários passados a limpo depois do dia.
 - **Editar (engenheiro):** abre o dia no formulário de Lançar hoje.
@@ -490,7 +526,7 @@ No topo, o botão **"Salvar em PDF"** e uma linha explicando o que vai sair (ex.
 2. **Dados:** obra, data com o dia da semana, cliente, entrega em contrato, quem lançou e a que horas, e o responsável técnico.
 3. **Condições do tempo:** tabela Manhã · Tarde · Noite ("Não informado" quando vazio).
 4. **Mão de obra (efetivo):** tabela função × quantidade, somando todas as frentes do dia, com a linha **Total**.
-5. **Serviços executados:** frente, ambiente, responsável, avanço no dia, avanço acumulado e equipe por função.
+5. **Serviços executados:** código e descrição do item do orçamento, frente, ambiente, responsável, avanço no dia, avanço acumulado, equipe por função e o "detalhe do dia". As **atividades fora do orçamento** entram no fim da tabela, com a descrição digitada e a marca "fora do orçamento".
 6. **Ferramentas e equipamentos:** equipamento, quantidade, origem e situação.
 7. **Ocorrências:** o texto do dia.
 8. **Registro fotográfico** (se marcado): fotos em grade de 2 colunas, cada uma com ambiente, frente e data na legenda. Entram **todas** as fotos do dia, liberadas ou não, porque o RDO é documento interno.
