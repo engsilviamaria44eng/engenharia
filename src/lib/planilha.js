@@ -57,8 +57,9 @@ function atributo(tag, nome) {
 }
 
 // Junta todos os <t> de um trecho (texto com formatação vem em vários pedaços).
+// A leitura fonética (<rPh>, usada em japonês) não faz parte do texto.
 function juntarTextos(xml) {
-  return [...xml.matchAll(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g)].map((m) => textoXml(m[1])).join('')
+  return [...xml.replace(/<rPh\b[\s\S]*?<\/rPh>/g, '').matchAll(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g)].map((m) => textoXml(m[1])).join('')
 }
 
 // Coluna "AB" -> 27 (base 0: 27). Linha "AB12" -> índice da coluna 27.
@@ -93,10 +94,11 @@ function estilosDeData(stylesXml) {
 
 function lerAba(xml, compartilhados, datas) {
   const linhas = []
-  for (const mLinha of xml.matchAll(/<row\b([^>]*)>([\s\S]*?)<\/row>/g)) {
-    const numero = Number(atributo(mLinha[0], 'r')) || linhas.length + 1
+  // A linha pode vir fechada sozinha (<row r="3" .../>): o Excel faz isso em linha vazia formatada.
+  for (const mLinha of xml.matchAll(/<row\b([^>]*?)(?:\/>|>([\s\S]*?)<\/row>)/g)) {
+    const numero = Number(atributo(`<row${mLinha[1]}>`, 'r')) || linhas.length + 1
     const celulas = []
-    for (const mCel of mLinha[2].matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
+    for (const mCel of (mLinha[2] ?? '').matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
       const abre = `<c${mCel[1]}>`
       const ref = atributo(abre, 'r')
       const tipo = atributo(abre, 't')
@@ -108,6 +110,7 @@ function lerAba(xml, compartilhados, datas) {
       else if (tipo === 'inlineStr') valor = juntarTextos(dentro)
       else if (tipo === 'str' || tipo === 'e') valor = v != null ? textoXml(v) : ''
       else if (tipo === 'b') valor = v === '1'
+      else if (tipo === 'd') valor = v ? v.slice(0, 10) : null // data já em texto ISO
       else if (v != null && v !== '') valor = datas.has(estilo) ? dataDoExcel(Number(v)) : Number(v)
       const col = ref ? indiceDaColuna(ref) : celulas.length
       celulas[col] = valor
@@ -206,122 +209,8 @@ export function paraData(v) {
   const ano = m[3].length === 2 ? `20${m[3]}` : m[3]
   const mes = Number(m[2])
   const dia = Number(m[1])
-  if (mes < 1 || mes > 12 || dia < 1 || dia > 31) return null
+  // Recusa dia que não existe no mês (31/02, 31/04...), contando ano bissexto.
+  const diasNoMes = new Date(Date.UTC(Number(ano), mes, 0)).getUTCDate()
+  if (mes < 1 || mes > 12 || dia < 1 || dia > diasNoMes) return null
   return `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
-}
-
-// Texto de célula para comparar com nomes conhecidos: sem acento, minúsculo, espaços simples.
-export function normalizar(v) {
-  return String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim()
-}
-
-// Acha, nas primeiras linhas de cada aba, a linha de cabeçalho que tem as colunas pedidas.
-// `apelidos` = { campo: ['nome possível', ...] } (já sem acento). Devolve a aba, a linha
-// (índice base 0) e a coluna de cada campo, ou null se nenhuma aba servir.
-export function acharCabecalho(abas, apelidos, obrigatorios, { linhasProcuradas = 15 } = {}) {
-  for (const aba of abas) {
-    for (let i = 0; i < Math.min(aba.linhas.length, linhasProcuradas); i++) {
-      const colunas = {}
-      aba.linhas[i].forEach((celula, c) => {
-        const nome = normalizar(celula)
-        for (const [campo, nomes] of Object.entries(apelidos)) {
-          if (colunas[campo] === undefined && nomes.includes(nome)) colunas[campo] = c
-        }
-      })
-      if (obrigatorios.every((campo) => colunas[campo] !== undefined)) return { aba, linha: i, colunas }
-    }
-  }
-  return null
-}
-
-// ---------- gerador de .xlsx (para as planilhas modelo) ----------
-// Zip sem compactação + o XML mínimo que o Excel aceita. Célula: texto, número ou
-// { data: 'AAAA-MM-DD' } (vira data de verdade no Excel, formato dd/mm/aaaa).
-const TABELA_CRC = Array.from({ length: 256 }, (_, n) => {
-  let c = n
-  for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1
-  return c >>> 0
-})
-
-function crc32(bytes) {
-  let c = 0xffffffff
-  for (const b of bytes) c = TABELA_CRC[(c ^ b) & 0xff] ^ (c >>> 8)
-  return (c ^ 0xffffffff) >>> 0
-}
-
-function zipSemCompactar(arquivos) {
-  const cod = new TextEncoder()
-  const partes = []
-  const central = []
-  let pos = 0
-  for (const [nome, texto] of arquivos) {
-    const n = cod.encode(nome)
-    const d = cod.encode(texto)
-    const crc = crc32(d)
-    const local = new Uint8Array(30)
-    const lv = new DataView(local.buffer)
-    lv.setUint32(0, 0x04034b50, true); lv.setUint16(4, 20, true); lv.setUint32(14, crc, true)
-    lv.setUint32(18, d.length, true); lv.setUint32(22, d.length, true); lv.setUint16(26, n.length, true)
-    const cd = new Uint8Array(46)
-    const cv = new DataView(cd.buffer)
-    cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true); cv.setUint32(16, crc, true)
-    cv.setUint32(20, d.length, true); cv.setUint32(24, d.length, true); cv.setUint16(28, n.length, true); cv.setUint32(42, pos, true)
-    partes.push(local, n, d)
-    central.push(cd, n)
-    pos += 30 + n.length + d.length
-  }
-  const tamCentral = central.reduce((s, p) => s + p.length, 0)
-  const fim = new Uint8Array(22)
-  const fv = new DataView(fim.buffer)
-  fv.setUint32(0, 0x06054b50, true); fv.setUint16(8, arquivos.length, true); fv.setUint16(10, arquivos.length, true)
-  fv.setUint32(12, tamCentral, true); fv.setUint32(16, pos, true)
-  const tudo = [...partes, ...central, fim]
-  const saida = new Uint8Array(tudo.reduce((s, p) => s + p.length, 0))
-  let o = 0
-  for (const p of tudo) { saida.set(p, o); o += p.length }
-  return saida
-}
-
-const escaparXml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-
-function letraDaColuna(i) {
-  let s = ''
-  for (let n = i + 1; n > 0; n = Math.floor((n - 1) / 26)) s = String.fromCharCode(65 + ((n - 1) % 26)) + s
-  return s
-}
-
-// Número de série do Excel para uma data 'AAAA-MM-DD' (o inverso de dataDoExcel).
-export function serialDoExcel(iso) {
-  const [a, m, d] = iso.split('-').map(Number)
-  return Math.round((Date.UTC(a, m - 1, d) - Date.UTC(1899, 11, 30)) / 86400000)
-}
-
-function xmlDaAba(linhas, larguras = []) {
-  const cols = larguras.length ? `<cols>${larguras.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols>` : ''
-  const rows = linhas.map((linha, r) => {
-    const cels = linha.map((v, c) => {
-      const ref = `${letraDaColuna(c)}${r + 1}`
-      if (v === null || v === undefined || v === '') return ''
-      if (typeof v === 'number') return `<c r="${ref}"><v>${v}</v></c>`
-      if (v && typeof v === 'object' && v.data) return `<c r="${ref}" s="1"><v>${serialDoExcel(v.data)}</v></c>`
-      return `<c r="${ref}" t="inlineStr"${r === 0 ? ' s="2"' : ''}><is><t xml:space="preserve">${escaparXml(v)}</t></is></c>`
-    }).join('')
-    return `<row r="${r + 1}">${cels}</row>`
-  }).join('')
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${cols}<sheetData>${rows}</sheetData></worksheet>`
-}
-
-// abas = [{ nome, linhas: [[...]], larguras: [12, 40, ...] }] -> bytes do .xlsx. A 1ª linha sai em negrito.
-export function gerarXlsx(abas) {
-  const ns = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'
-  const rel = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
-  const arquivos = [
-    ['[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${abas.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`],
-    ['_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${rel}/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
-    ['xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${ns}" xmlns:r="${rel}"><sheets>${abas.map((a, i) => `<sheet name="${escaparXml(a.nome)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets></workbook>`],
-    ['xl/_rels/workbook.xml.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${abas.map((_, i) => `<Relationship Id="rId${i + 1}" Type="${rel}/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId${abas.length + 1}" Type="${rel}/styles" Target="styles.xml"/></Relationships>`],
-    ['xl/styles.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="${ns}"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="14" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs></styleSheet>`],
-    ...abas.map((a, i) => [`xl/worksheets/sheet${i + 1}.xml`, xmlDaAba(a.linhas, a.larguras)]),
-  ]
-  return zipSemCompactar(arquivos)
 }

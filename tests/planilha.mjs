@@ -122,5 +122,19 @@ conferir('data inválida', [paraData('32/13/2026'), paraData('amanhã')], [null,
 conferir('coluna A e Z', [indiceDaColuna('A1'), indiceDaColuna('Z9')], [0, 25])
 conferir('dia 1 do Excel antigo', dataDoExcel(61), '1900-03-01')
 
+// casos de borda apontados na revisão
+const sheetBorda = `<worksheet><sheetData>
+<row r="1"><c r="A1" t="s"><v>0</v></c></row>
+<row r="2" ht="20" customHeight="1"/>
+<row r="3"><c r="A3" t="d"><v>2026-10-25T00:00:00</v></c><c r="B3" t="s"><v>1</v></c></row>
+</sheetData></worksheet>`
+const sharedFonetico = `<sst><si><t>Código</t></si><si><t>Texto</t><rPh sb="0" eb="1"><t>テキスト</t></rPh></si></sst>`
+const borda = await lerPlanilha(zip({ ...arquivos, 'xl/worksheets/sheet1.xml': sheetBorda, 'xl/sharedStrings.xml': sharedFonetico }), 'b.xlsx')
+conferir('linha vazia fechada sozinha não engole a seguinte', borda[0].linhas.map((l) => l.length), [1, 0, 2])
+conferir('célula de data em texto (t="d")', borda[0].linhas[2][0], '2026-10-25')
+conferir('leitura fonética fica de fora', borda[0].linhas[2][1], 'Texto')
+conferir('dia que não existe no mês', [paraData('31/02/2026'), paraData('31/04/2026'), paraData('29/02/2028'), paraData('29/02/2027')], [null, null, '2028-02-29', null])
+conferir('data do MS Project com dia da semana', paraData('Seg 19/10/26 08:00'), '2026-10-19')
+
 console.log(`${ok}/${tot} — planilha`)
 if (ok !== tot) process.exit(1)

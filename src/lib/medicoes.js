@@ -6,12 +6,35 @@
 // Dinheiro sempre em reais com 2 casas; a quantidade é a fonte da verdade (o % e o R$ saem dela).
 import { somarDias } from './datas.js'
 
+// `acao` = o texto do botão que leva o contrato DESTA coluna para a próxima.
 export const STATUS_CONTRATO = [
-  { id: 'elaboracao', rotulo: 'Em elaboração' },
-  { id: 'enviado', rotulo: 'Enviado p/ aprovação' },
-  { id: 'ativo', rotulo: 'Aprovado / Ativo' },
-  { id: 'concluido', rotulo: 'Concluído' },
+  { id: 'elaboracao', rotulo: 'Em elaboração', acao: 'Enviar p/ aprovação' },
+  { id: 'enviado', rotulo: 'Enviado p/ aprovação', acao: 'Aprovar e cadastrar valor' },
+  { id: 'ativo', rotulo: 'Aprovado / Ativo', acao: 'Concluir' },
+  { id: 'concluido', rotulo: 'Concluído', acao: null },
 ]
+
+export const STATUS_MEDICAO = [
+  { id: 'rascunho', rotulo: 'Rascunho' },
+  { id: 'fechada', rotulo: 'Fechada' },
+]
+
+export const TIPOS_CONTRATO = [
+  { id: 'global', rotulo: 'Global', descricao: 'contrato global' },
+  { id: 'escopo', rotulo: 'Por escopo', descricao: 'contrato por escopo' },
+]
+
+export function rotuloStatusMedicao(id) {
+  return STATUS_MEDICAO.find((s) => s.id === id)?.rotulo ?? id
+}
+
+export function tipoDoContrato(id) {
+  return TIPOS_CONTRATO.find((t) => t.id === id) ?? null
+}
+
+export function acaoDeAvancar(status) {
+  return STATUS_CONTRATO.find((s) => s.id === status)?.acao ?? null
+}
 
 export const UNIDADES = [
   { id: 'm2', rotulo: 'm²' },
@@ -79,19 +102,34 @@ export function medicoesDoContrato(contrato, medicoes) {
   return medicoes.filter((m) => m.contrato_id === contrato.id).sort((a, b) => b.numero - a.numero)
 }
 
-// Valor de um boletim. Global: % × valor total. Por escopo: quantidade × preço de cada linha.
+// Valor de um boletim. Global: % × valor total. Por escopo: soma das linhas, cada uma já em
+// centavos (quantidade × preço arredondado), para o total bater com a planilha exportada.
 export function valorDaMedicao(medicao, contrato, itens) {
   if (contrato.tipo === 'global') return arredondar2(((medicao.percentual ?? 0) / 100) * (contrato.valor_global ?? 0))
   const precos = new Map(itensDoContrato(contrato, itens).map((i) => [i.id, i.preco_unitario]))
-  return arredondar2((medicao.linhas ?? []).reduce((s, l) => s + l.quantidade * (precos.get(l.item_id) ?? 0), 0))
+  return arredondar2((medicao.linhas ?? []).reduce((s, l) => s + arredondar2(l.quantidade * (precos.get(l.item_id) ?? 0)), 0))
 }
 
 // Acumulado de todos os boletins (rascunho e fechado), em R$ e %, e o saldo a medir.
 export function resumoDoContrato(contrato, itens, medicoes) {
   const total = valorTotal(contrato, itens)
   const medido = arredondar2(medicoesDoContrato(contrato, medicoes).reduce((s, m) => s + valorDaMedicao(m, contrato, itens), 0))
-  const pct = total ? Math.min(100, arredondar2((medido / total) * 100)) : 0
-  return { total, medido, pct, saldo: total === null ? null : arredondar2(total - medido), boletins: medicoesDoContrato(contrato, medicoes).length }
+  const pct = total ? arredondar2((medido / total) * 100) : 0
+  const boletins = medicoesDoContrato(contrato, medicoes)
+  return {
+    total, medido, pct, saldo: total === null ? null : arredondar2(total - medido),
+    boletins: boletins.length, rascunhos: boletins.filter((m) => m.status === 'rascunho').length,
+  }
+}
+
+// Ficha: abre no contrato ativo (para medir) ou no concluído que tem boletins (para consultar).
+export function podeAbrirFicha(contrato, resumo) {
+  return contrato.status === 'ativo' || (contrato.status === 'concluido' && resumo.boletins > 0)
+}
+
+// Boletim novo: só contrato ativo e com saldo a medir.
+export function podeNovaMedicao(contrato, resumo) {
+  return contrato.status === 'ativo' && resumo.total !== null && resumo.saldo > 0
 }
 
 // Os contratos ativos da obra: quantos, quanto foi contratado e quanto falta medir.
@@ -115,12 +153,15 @@ export function statusAnteriorContrato(status) {
 
 // Pode mover? Devolve { ok, motivo, pedeValor }.
 // - Ir para Aprovado/Ativo abre o cadastro do valor.
-// - Concluído só com 100% medido.
+// - Concluído só com 100% medido (saldo zero, conferido em centavos) e sem rascunho aberto.
 // - Ativo com boletim não volta (o valor já foi usado para medir).
 export function podeMoverContrato(contrato, destino, resumo) {
   if (destino === 'ativo' && contrato.status === 'enviado') return { ok: true, motivo: null, pedeValor: true }
-  if (destino === 'concluido' && resumo.pct < 100) {
-    return { ok: false, motivo: `Só dá para concluir com 100% medido. Este contrato está com ${formatarPct(resumo.pct)}.`, pedeValor: false }
+  if (destino === 'concluido' && !(resumo.saldo !== null && resumo.saldo <= 0)) {
+    return { ok: false, motivo: `Só dá para concluir com 100% medido. Este contrato está com ${formatarPct(resumo.pct)} (saldo ${formatarReais(resumo.saldo)}).`, pedeValor: false }
+  }
+  if (destino === 'concluido' && resumo.rascunhos > 0) {
+    return { ok: false, motivo: 'Feche as medições em rascunho antes de concluir o contrato.', pedeValor: false }
   }
   if (contrato.status === 'ativo' && destino === 'enviado' && resumo.boletins > 0) {
     return { ok: false, motivo: 'Este contrato já tem medição lançada: não volta para aprovação.', pedeValor: false }
@@ -129,7 +170,7 @@ export function podeMoverContrato(contrato, destino, resumo) {
 }
 
 export function formatarPct(pct) {
-  return `${Number(pct).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
+  return `${Number(pct).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`
 }
 
 export function moverContrato(contrato, destino) {
@@ -360,10 +401,15 @@ export function boletimParaFormulario(medicao, contrato) {
 // Planilha (CSV com ; e vírgula decimal, abre no Excel) de um boletim.
 export function csvDoBoletim(medicao, contrato, itens) {
   const num = (v, casas = 2) => Number(v ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas, useGrouping: false })
-  const campo = (t) => (/[;"\n]/.test(String(t)) ? `"${String(t).replace(/"/g, '""')}"` : String(t))
+  // Texto que começa com = + - @ viraria fórmula no Excel: entra com um apóstrofo na frente.
+  const campo = (t) => {
+    let s = String(t)
+    if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`
+    return /[;"\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  }
   const cab = [
     `Boletim de medição nº ${medicao.numero};${campo(contrato.empreiteiro)};${campo(contrato.descricao)}`,
-    `Período;${medicao.periodo_inicio.split('-').reverse().join('/')} a ${medicao.periodo_fim.split('-').reverse().join('/')};Situação;${medicao.status === 'fechada' ? 'Fechada' : 'Rascunho'}`,
+    `Período;${medicao.periodo_inicio.split('-').reverse().join('/')} a ${medicao.periodo_fim.split('-').reverse().join('/')};Situação;${rotuloStatusMedicao(medicao.status)}`,
     '',
   ]
   if (contrato.tipo === 'global') {
@@ -372,7 +418,7 @@ export function csvDoBoletim(medicao, contrato, itens) {
   const porId = new Map(itensDoContrato(contrato, itens).map((i) => [i.id, i]))
   const linhas = (medicao.linhas ?? []).filter((l) => l.quantidade > 0).map((l) => {
     const it = porId.get(l.item_id)
-    return [campo(it.descricao), rotuloUnidade(it.unidade), num(l.quantidade, 2), num(pctDaQuantidade(l.quantidade, it), 2), num(it.preco_unitario), num(reaisDaQuantidade(l.quantidade, it))].join(';')
+    return [campo(it.descricao), rotuloUnidade(it.unidade), num(l.quantidade, 4), num(pctDaQuantidade(l.quantidade, it), 2), num(it.preco_unitario), num(reaisDaQuantidade(l.quantidade, it))].join(';')
   })
   return [...cab, 'Item;Unidade;Quantidade;% do item;Preço unitário (R$);Valor (R$)', ...linhas, `Total do boletim;;;;;${num(valorDaMedicao(medicao, contrato, itens))}`, ''].join('\r\n')
 }

@@ -5,7 +5,7 @@
 import { useState } from 'react'
 import {
   formatarReais, formatarPct, rotuloUnidade, resumoDoContrato, itensDoContrato, medicoesDoContrato, valorDaMedicao,
-  podeMedir, proximoNumero, periodoSugerido, medidoAntes, pctDoGlobal, reaisDoPct, quantidadeDaLinha, pctDaQuantidade,
+  podeMedir, podeNovaMedicao, tipoDoContrato, rotuloStatusMedicao, proximoNumero, periodoSugerido, medidoAntes, pctDoGlobal, reaisDoPct, quantidadeDaLinha, pctDaQuantidade,
   reaisDaQuantidade, validarBoletim, montarBoletim, previaDoBoletim, podeEditarBoletim, fecharBoletim, boletimParaFormulario,
   csvDoBoletim, soNumero, valorTotal,
 } from '../lib/medicoes.js'
@@ -139,7 +139,7 @@ export default function FichaMedicao({ contrato, itens, medicoes, onVoltar, onCr
   const hoje = hojeISO()
   const r = resumoDoContrato(contrato, itens, medicoes)
   const boletins = medicoesDoContrato(contrato, medicoes)
-  const pode = podeMedir(contrato) && r.pct < 100
+  const pode = podeNovaMedicao(contrato, r)
 
   function abrirNovo() {
     const p = periodoSugerido(contrato, medicoes, hoje)
@@ -158,7 +158,7 @@ export default function FichaMedicao({ contrato, itens, medicoes, onVoltar, onCr
     <>
       <button className="voltar" onClick={onVoltar}>← Contratos</button>
       <h1 className="titulo-tela">{contrato.empreiteiro}</h1>
-      <p className="subtitulo">{contrato.descricao} · {contrato.tipo === 'global' ? 'contrato global' : 'contrato por escopo'}</p>
+      <p className="subtitulo">{contrato.descricao} · {tipoDoContrato(contrato.tipo)?.descricao}</p>
       <div className="resumo">
         <div className="stat"><span className="rot">Valor total</span><span className="val val-dinheiro">{formatarReais(r.total)}</span></div>
         <div className="stat verde"><span className="rot">Medido</span><span className="val val-dinheiro">{formatarReais(r.medido)}</span><span className="rot">{formatarPct(r.pct)}</span></div>
@@ -167,7 +167,7 @@ export default function FichaMedicao({ contrato, itens, medicoes, onVoltar, onCr
       <span className="barra-rp barra-ficha" role="img" aria-label={`Medido ${formatarPct(r.pct)}`}><i style={{ width: `${r.pct}%` }} /></span>
       {pode && <div className="barra-acoes"><button className="btn btn-pri" onClick={abrirNovo}>Nova medição</button></div>}
       {!podeMedir(contrato) && <p className="nota">Só contrato "Aprovado / Ativo" recebe medição.</p>}
-      {podeMedir(contrato) && r.pct >= 100 && <p className="nota">100% medido: o contrato já pode ser concluído no quadro.</p>}
+      {podeMedir(contrato) && !pode && <p className="nota">100% medido: feche os rascunhos e conclua o contrato no quadro.</p>}
 
       {boletins.length === 0 ? (
         <Vazio icone="medicao" titulo="Nenhuma medição ainda para este empreiteiro"
@@ -180,7 +180,7 @@ export default function FichaMedicao({ contrato, itens, medicoes, onVoltar, onCr
               <li key={m.id}>
                 <div className="hist-linha">
                   <b>Medição nº {m.numero}</b>
-                  <span className={`pill ${m.status === 'fechada' ? 'ok' : 'atencao'}`}>{m.status === 'fechada' ? 'Fechada' : 'Rascunho'}</span>
+                  <span className={`pill ${m.status === 'fechada' ? 'ok' : 'atencao'}`}>{rotuloStatusMedicao(m.status)}</span>
                 </div>
                 <span className="pedido-info">{formatarData(m.periodo_inicio)} a {formatarData(m.periodo_fim)}</span>
                 <span className="hist-valor">{formatarReais(valorDaMedicao(m, contrato, itens))}</span>

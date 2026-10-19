@@ -4,6 +4,7 @@ import {
   proximoStatusContrato, statusAnteriorContrato, podeMoverContrato, moverContrato, podeEditarValor, podeMedir,
   validarNovoContrato, novoContrato, validarValor, totalDoEscopo, aplicarValor, valorParaFormulario, linhaVaziaDeEscopo,
   proximoNumero, periodoSugerido, medidoAntes, pctDoGlobal, reaisDoPct, quantidadeDaLinha, pctDaQuantidade, reaisDaQuantidade,
+  podeAbrirFicha, podeNovaMedicao, rotuloStatusMedicao, tipoDoContrato, acaoDeAvancar,
   validarBoletim, numerosDoBoletim, previaDoBoletim, montarBoletim, boletimParaFormulario, podeEditarBoletim, fecharBoletim, csvDoBoletim,
 } from '../src/lib/medicoes.js'
 import { CONTRATOS, ITENS_CONTRATO, MEDICOES } from '../src/lib/mockData.js'
@@ -51,8 +52,15 @@ conferir('ordem das colunas', [proximoStatusContrato('elaboracao'), proximoStatu
 conferir('em elaboração não volta', statusAnteriorContrato('elaboracao'), null)
 conferir('aprovar pede o valor', podeMoverContrato(c('ct-03'), 'ativo', { pct: 0, boletins: 0 }).pedeValor, true)
 const bloqueio = podeMoverContrato(drywall, 'concluido', rDry)
-conferir('concluir com 52% é bloqueado e avisa', [bloqueio.ok, bloqueio.motivo], [false, 'Só dá para concluir com 100% medido. Este contrato está com 52%.'])
-conferir('concluir com 100% pode', podeMoverContrato(gesso, 'concluido', { pct: 100, boletins: 4 }).ok, true)
+// (o R$ do Intl vem com espaço "duro"; a comparação troca por espaço comum)
+conferir('concluir com 52% é bloqueado e avisa', [bloqueio.ok, bloqueio.motivo.replace(/\s/g, ' ')], [false, 'Só dá para concluir com 100% medido. Este contrato está com 52% (saldo R$ 14.400,00).'])
+conferir('concluir com 100% e tudo fechado pode', podeMoverContrato(gesso, 'concluido', { pct: 100, saldo: 0, boletins: 4, rascunhos: 0 }).ok, true)
+conferir('concluir com rascunho aberto é bloqueado', podeMoverContrato(gesso, 'concluido', { pct: 100, saldo: 0, boletins: 2, rascunhos: 1 }).motivo, 'Feche as medições em rascunho antes de concluir o contrato.')
+conferir('99,99% (falta 1 centavo) não conclui', podeMoverContrato(gesso, 'concluido', { pct: 100, saldo: 0.01, boletins: 2, rascunhos: 0 }).ok, false)
+conferir('% acima de 100 aparece, não é escondido', resumoDoContrato({ id: 'x', tipo: 'global', valor_global: 100 }, [], [{ contrato_id: 'x', numero: 1, percentual: 120, status: 'fechada' }]).pct, 120)
+conferir('ficha abre no ativo e no concluído com boletim', [podeAbrirFicha(gesso, { boletins: 0 }), podeAbrirFicha(c('ct-05'), { boletins: 2 }), podeAbrirFicha(c('ct-03'), { boletins: 0 })], [true, true, false])
+conferir('nova medição só com saldo', [podeNovaMedicao(gesso, { total: 30000, saldo: 22500 }), podeNovaMedicao(gesso, { total: 30000, saldo: 0 })], [true, false])
+conferir('rótulos de um dono só', [rotuloStatusMedicao('fechada'), tipoDoContrato('escopo').rotulo, acaoDeAvancar('enviado'), acaoDeAvancar('concluido')], ['Fechada', 'Por escopo', 'Aprovar e cadastrar valor', null])
 conferir('ativo com boletim não volta para aprovação', podeMoverContrato(drywall, 'enviado', rDry).ok, false)
 conferir('ativo sem boletim pode voltar', podeMoverContrato(c('ct-06'), 'enviado', { pct: 0, boletins: 0 }).ok, true)
 conferir('mover troca só o status', moverContrato(c('ct-04'), 'enviado'), { ...c('ct-04'), status: 'enviado' })
@@ -138,8 +146,12 @@ conferir('fechar troca só a situação', fecharBoletim(md3).status, 'fechada')
 const csv = csvDoBoletim(md3, drywall, ITENS_CONTRATO).split('\r\n')
 conferir('CSV: cabeçalho do boletim', csv[0], 'Boletim de medição nº 2;Drywall Forte;Paredes de drywall dos quartos')
 conferir('CSV: período e situação', csv[1], 'Período;05/10/2026 a 18/10/2026;Situação;Rascunho')
-conferir('CSV: linha do item com vírgula decimal', csv[4], 'Placas de drywall (montagem);m²;40,00;20,00;80,00;3200,00')
+conferir('CSV: linha do item com vírgula decimal', csv[4], 'Placas de drywall (montagem);m²;40,0000;20,00;80,00;3200,00')
 conferir('CSV: total do boletim', csv.at(-2), 'Total do boletim;;;;;7600,00')
+const perigoso = { ...drywall, empreiteiro: '=HYPERLINK("x")', descricao: 'linha\r\nquebrada' }
+conferir('CSV não deixa virar fórmula no Excel', csvDoBoletim(md3, perigoso, ITENS_CONTRATO).split('\r\n')[0], 'Boletim de medição nº 2;"\'=HYPERLINK(""x"")";"linha')
+const meio = { contrato_id: 'ct-02', numero: 9, linhas: [{ item_id: 'ic-01', quantidade: 0.00625 }, { item_id: 'ic-02', quantidade: 0.0125 }] }
+conferir('total do boletim = soma das linhas em centavos', valorDaMedicao(meio, drywall, ITENS_CONTRATO), 1)
 conferir('CSV global', csvDoBoletim(MEDICOES[0], gesso, ITENS_CONTRATO).split('\r\n')[4], 'Forro de gesso em placas e sancas;25,00;7500,00')
 
 console.log(`${ok}/${tot} — medicoes`)

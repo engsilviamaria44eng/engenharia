@@ -10,6 +10,10 @@ import {
 
 const PlanejamentoContext = createContext(null)
 
+// Atividade recém-criada ainda com id provisório (temp-…) não pode ser gravada: o banco
+// ainda não sabe quem ela é. Acontece só se a pessoa mexer nela no mesmo segundo.
+const aindaSalvando = (a) => String(a.id).startsWith('temp-') || String(a.pai_id ?? '').startsWith('temp-')
+
 export function PlanejamentoProvider({ children }) {
   const { obra } = useObra()
   const [estado, setEstado] = useState({ carregando: true, erro: null })
@@ -39,6 +43,10 @@ export function PlanejamentoProvider({ children }) {
   }, [aviso])
 
   async function criar(nova, mensagem) {
+    if (aindaSalvando({ id: '', pai_id: nova.pai_id })) {
+      setAviso('Aguarde um instante: a atividade de cima ainda está sendo salva.')
+      return
+    }
     const temp = { ...nova, id: `temp-${Date.now()}` }
     setAtividades((lista) => [...lista, temp])
     const { data, erro } = await criarAtividadePlanejamento(nova)
@@ -54,6 +62,10 @@ export function PlanejamentoProvider({ children }) {
   // Grava uma ou várias atividades já alteradas (a regra da mudança vem de lib/planejamento.js).
   async function salvar(alteradas, mensagem) {
     if (alteradas.length === 0) return
+    if (alteradas.some(aindaSalvando)) {
+      setAviso('Aguarde um instante: a atividade nova ainda está sendo salva.')
+      return
+    }
     const novas = new Map(alteradas.map((a) => [a.id, a]))
     const antes = new Map(atividades.filter((a) => novas.has(a.id)).map((a) => [a.id, a]))
     setAtividades((lista) => lista.map((a) => novas.get(a.id) ?? a))

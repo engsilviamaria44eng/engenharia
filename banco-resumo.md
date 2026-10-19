@@ -32,7 +32,7 @@ Toda tabela tem `id` (um código único gerado pelo banco), `created_at` (quando
 - quantidade tem que ser maior que zero;
 - pedido sem obra ou com material que não existe é recusado;
 - datas são guardadas como **dia** (sem hora): o dia digitado é o dia salvo;
-- no Planejamento: o fim não pode ser antes do início, o % vai de 0 a 100, e o tipo da
+- no Planejamento: a subatividade só fica dentro de um grupo da mesma obra; o fim não pode ser antes do início, o % vai de 0 a 100, e o tipo da
   restrição e a causa do "não realizado" só aceitam as opções do app;
 - gravar várias atividades de uma vez (ex.: arquivar um grupo com as filhas) passa pela
   função `salvar_atividades_planejamento`: grava tudo junto ou nada, e recusa se alguma
@@ -78,6 +78,8 @@ Para rodar: peça ao Claude "roda o seed de novo", ou cole no SQL Editor do Supa
    (inclusive apagar) e desligou essa liberação automática para as próximas tabelas.
 3. `20261019-3-planejamento.sql` — criou as 2 tabelas do Planejamento, as regras, a função
    de gravação e a RLS provisória.
+4. `20261019-4-planejamento-ajustes.sql` — a subatividade só pode ficar dentro de um grupo
+   da mesma obra; restrição sem tipo e "não realizado" sem causa passam a ser recusados.
 
 ## Conferências automáticas (`npm run check`)
 

@@ -298,6 +298,10 @@ export function salvarContrato(contrato, itens = null) {
   if (!obraId) return semObra()
   const i = contratosMock.findIndex((c) => c.id === contrato.id && c.obra_id === obraId)
   if (i < 0) return Promise.resolve(deOutraObraContrato)
+  // Os boletins apontam para os itens: com boletim lançado, o valor não pode ser trocado.
+  if (itens && medicoesMock.some((m) => m.contrato_id === contrato.id)) {
+    return Promise.resolve({ data: null, erro: 'Este contrato já tem medição: o valor não pode mais ser trocado.' })
+  }
   contratosMock[i] = { ...structuredClone(contrato), obra_id: obraId }
   let novosItens = itensContratoMock.filter((it) => it.contrato_id === contrato.id)
   if (itens) {
@@ -308,12 +312,15 @@ export function salvarContrato(contrato, itens = null) {
 }
 
 let proximaMedicaoMock = medicoesMock.length + 1
+const soContratoAtivo = { data: null, erro: 'Só contrato "Aprovado / Ativo" recebe medição.' }
 
 // Boletim novo do contrato (a tela manda sem obra_id; a camada põe). Recusa contrato de outra obra.
 export function criarMedicao(medicao) {
   const obraId = obraDasMedicoes()
   if (!obraId) return semObra()
-  if (!contratosMock.some((c) => c.id === medicao.contrato_id && c.obra_id === obraId)) return Promise.resolve(deOutraObraContrato)
+  const contrato = contratosMock.find((c) => c.id === medicao.contrato_id && c.obra_id === obraId)
+  if (!contrato) return Promise.resolve(deOutraObraContrato)
+  if (contrato.status !== 'ativo') return Promise.resolve(soContratoAtivo)
   const nova = { ...structuredClone(medicao), id: `md-${String(proximaMedicaoMock++).padStart(2, '0')}`, obra_id: obraId }
   medicoesMock.push(nova)
   return resposta(structuredClone(nova))
@@ -326,6 +333,8 @@ export function salvarMedicao(medicao) {
   const i = medicoesMock.findIndex((m) => m.id === medicao.id && m.obra_id === obraId)
   if (i < 0) return Promise.resolve({ data: null, erro: 'Este boletim não é da obra aberta. Recarregue a tela.' })
   if (medicoesMock[i].status === 'fechada') return Promise.resolve({ data: null, erro: 'Este boletim já está fechado e não pode mudar.' })
+  if (medicao.contrato_id !== medicoesMock[i].contrato_id) return Promise.resolve(deOutraObraContrato)
+  if (contratosMock.find((c) => c.id === medicao.contrato_id)?.status !== 'ativo') return Promise.resolve(soContratoAtivo)
   medicoesMock[i] = { ...structuredClone(medicao), obra_id: obraId }
   return resposta(structuredClone(medicoesMock[i]))
 }

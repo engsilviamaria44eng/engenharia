@@ -9,13 +9,12 @@ import FichaMedicao from './medicaoFicha.jsx'
 import {
   STATUS_CONTRATO, UNIDADES, rotuloStatusContrato, formatarReais, formatarPct, resumoDoContrato, resumoDosAtivos,
   proximoStatusContrato, statusAnteriorContrato, podeMoverContrato, moverContrato, podeEditarValor,
+  podeAbrirFicha, podeMedir, tipoDoContrato, acaoDeAvancar,
   validarNovoContrato, novoContrato, validarValor, totalDoEscopo, aplicarValor, valorParaFormulario,
   linhaVaziaDeEscopo, lerNumero, soNumero, arredondar2,
 } from '../lib/medicoes.js'
 import { Vazio } from '../components/index.jsx'
 import { Campo, Folha, Confirmar } from '../components/formulario.jsx'
-
-const ROTULO_AVANCAR = { elaboracao: 'Enviar p/ aprovação', enviado: 'Aprovar e cadastrar valor', ativo: 'Concluir' }
 
 function FormNovoContrato({ onSalvar, onFechar }) {
   const [d, setD] = useState({ empreiteiro: '', descricao: '' })
@@ -169,11 +168,11 @@ function CartaoContrato({ c, resumo, onMover, onEditarValor, onAbrirFicha }) {
       <div className="pedido-topo"><b>{c.empreiteiro}</b></div>
       <span className="pedido-frente">{c.descricao}</span>
       <div className="pills">
-        {c.tipo && <span className="pill azul">{c.tipo === 'global' ? 'Global' : 'Por escopo'}</span>}
+        {tipoDoContrato(c.tipo) && <span className="pill azul">{tipoDoContrato(c.tipo).rotulo}</span>}
         {resumo.boletins > 0 && <span className="pill neutra">{resumo.boletins} {resumo.boletins === 1 ? 'boletim' : 'boletins'}</span>}
       </div>
       {resumo.total !== null && <span className="pedido-qtd">{formatarReais(resumo.total)}</span>}
-      {(c.status === 'ativo' || c.status === 'concluido') && resumo.total !== null && (
+      {podeAbrirFicha(c, resumo) && resumo.total !== null && (
         <>
           <span className="barra-rp" role="img" aria-label={`Medido ${formatarPct(resumo.pct)}`}><i style={{ width: `${resumo.pct}%` }} /></span>
           <span className="pedido-info">Medido <b>{formatarPct(resumo.pct)}</b> · {formatarReais(resumo.medido)} · saldo {formatarReais(resumo.saldo)}</span>
@@ -181,16 +180,13 @@ function CartaoContrato({ c, resumo, onMover, onEditarValor, onAbrirFicha }) {
       )}
       <div className="pedido-acoes">
         {ant && <button className="btn-mini" onClick={() => onMover(c, ant)} aria-label={`Voltar para ${rotuloStatusContrato(ant)}`}>Voltar</button>}
-        {prox && <button className="btn-mini pri" onClick={() => onMover(c, prox)}>{ROTULO_AVANCAR[c.status]}</button>}
+        {prox && <button className="btn-mini pri" onClick={() => onMover(c, prox)}>{acaoDeAvancar(c.status)}</button>}
       </div>
-      {c.status === 'ativo' && (
+      {podeAbrirFicha(c, resumo) && (
         <div className="pedido-acoes">
-          <button className="btn-mini pri" onClick={() => onAbrirFicha(c)}>Ficha de medição</button>
+          <button className={`btn-mini ${podeMedir(c) ? 'pri' : ''}`} onClick={() => onAbrirFicha(c)}>{podeMedir(c) ? 'Ficha de medição' : 'Ver medições'}</button>
           {podeEditarValor(c, resumo) && <button className="btn-mini" onClick={() => onEditarValor(c)}>Editar valor</button>}
         </div>
-      )}
-      {c.status === 'concluido' && resumo.boletins > 0 && (
-        <div className="pedido-acoes"><button className="btn-mini" onClick={() => onAbrirFicha(c)}>Ver medições</button></div>
       )}
     </article>
   )
@@ -244,14 +240,16 @@ export default function Medicao() {
   }
 
   async function gravar(depois, novosItens, mensagem) {
+    // Desfaz só o que é deste contrato (mudança em outro contrato, feita no meio, fica).
     const antes = contratos.find((c) => c.id === depois.id)
-    const itensAntes = itens
+    const itensAntes = itens.filter((i) => i.contrato_id === depois.id)
+    const marca = Date.now()
     setContratos((lista) => lista.map((c) => (c.id === depois.id ? depois : c)))
-    if (novosItens) setItens((lista) => [...lista.filter((i) => i.contrato_id !== depois.id), ...novosItens.map((it, k) => ({ ...it, id: `temp-${k}` }))])
+    if (novosItens) setItens((lista) => [...lista.filter((i) => i.contrato_id !== depois.id), ...novosItens.map((it, k) => ({ ...it, id: `temp-${marca}-${k}` }))])
     const { data, erro } = await salvarContrato(depois, novosItens)
     if (erro) {
       setContratos((lista) => lista.map((c) => (c.id === depois.id ? antes : c)))
-      setItens(itensAntes)
+      setItens((lista) => [...lista.filter((i) => i.contrato_id !== depois.id), ...itensAntes])
       setAviso(`Não foi possível salvar: ${erro}`)
       return
     }
