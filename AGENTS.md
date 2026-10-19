@@ -42,7 +42,8 @@ Uma pergunta decide: **"isto continuaria verdade se a tela fosse outra?"**
 - **Não → `src/screens/*.jsx`.** Estado de interface, layout, o que se toca.
   A tela **pede a decisão à lib**; não decide.
 - `src/lib/dados.js` — **única porta dos dados.** Nenhuma tela chama o Supabase direto.
-- `src/lib/supabase.js` — a conexão (fica `null` enquanto não houver `.env.local`).
+- `src/lib/supabase.js` — a conexão (fica `null` sem `.env.local`, como nos testes em
+  Node; aí `dados.js` usa o mock). Obras e Materiais já vêm do banco.
 
 Três consequências práticas:
 
@@ -82,7 +83,17 @@ git e a Vercel publica sozinha. A pessoa não digita comando.
 
 - **Tabela nova nasce fechada para o app.** Toda tabela precisa de `grant` escrito na
   migration, só para `authenticated`. Erro 42501 é GRANT faltando, não RLS. Nunca
-  `grant all`, nunca `to anon`.
+  `grant all`, nunca `to anon`. **Exceção provisória:** até o Capítulo 15 (Login) o app
+  roda sem login, então as tabelas atuais liberam `anon` com políticas `dev_*` e a
+  marca `publico-de-proposito` na migration. Não publicar o app antes de fechar isso.
+- **Banco:** projeto Supabase `fmz-obras` (sa-east-1); conexão no `.env.local`
+  (`VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY`, nunca a service_role).
+  O mapa do banco e os provisórios estão em `banco-resumo.md` — leia antes de mexer.
+- **Depois de qualquer migration, regenere `tests/_schema-snapshot.json`** (colunas do
+  `list_tables`) e atualize o `banco-resumo.md`. Migration nova vira arquivo em
+  `supabase/migrations/` com o mesmo conteúdo aplicado.
+- **Provisórios do back-end:** membros, frentes e login ainda são mock, casados com o
+  banco pelo `codigo` da obra; `pedidos_material.frente` é texto (vira `frente_id`).
 - **No Windows, use `npm.cmd`** (e `npx.cmd`) se o PowerShell bloquear o `npm.ps1`.
   Nunca mude a política de execução do Windows por causa disso.
 - **O projeto está dentro do OneDrive.** A `node_modules` é recriável (`npm install`); se o

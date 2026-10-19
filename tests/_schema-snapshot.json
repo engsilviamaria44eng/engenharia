@@ -1,0 +1,38 @@
+{
+    "obras":  [
+                  "id",
+                  "codigo",
+                  "nome",
+                  "endereco",
+                  "cliente",
+                  "data_inicio",
+                  "data_entrega",
+                  "situacao",
+                  "created_at",
+                  "updated_at"
+              ],
+    "materiais_catalogo":  [
+                               "id",
+                               "codigo",
+                               "nome",
+                               "unidade",
+                               "categoria",
+                               "created_at",
+                               "updated_at"
+                           ],
+    "pedidos_material":  [
+                             "id",
+                             "obra_id",
+                             "material_id",
+                             "quantidade",
+                             "frente",
+                             "prioridade",
+                             "status",
+                             "fornecedor",
+                             "previsao_entrega",
+                             "historico",
+                             "recebimento",
+                             "created_at",
+                             "updated_at"
+                         ]
+}
