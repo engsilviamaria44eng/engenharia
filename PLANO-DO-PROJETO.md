@@ -36,7 +36,7 @@ O mestre lança o diário pelo celular, no canteiro: o que andou em cada frente,
 
 **O que ele NÃO faz (v1):**
 - **Montar** orçamento ou composição de preço: isso continua no seu programa de orçamento. O sistema **importa o orçamento analítico pronto**, mostra e usa os serviços dele, mas não serve para orçar (decisão do engenheiro, 18/10/2026).
-- Importar o arquivo do MS Project: na v1 as frentes e as datas são cadastradas no sistema. Importar ficaria para a v2.
+- ~~Importar o arquivo do MS Project: ficaria para a v2~~ → **antecipado em 19/10/2026 (decisão do engenheiro):** o app importa **planilhas Excel (.xlsx) ou CSV** de **orçamento** e de **cronograma**. O cronograma importado vira as **atividades do Planejamento** (EAP com datas e %). Antes de gravar, mostra uma prévia com os erros por linha; ao confirmar, substitui a versão anterior. Leitor de .xlsx próprio, sem biblioteca nova (o .xls antigo não é lido). `[PENDENTE: as colunas exatas saem das planilhas reais que o engenheiro vai pôr na pasta planilhas/]`
 - Pagamento de empreiteiro ou financeiro da obra: o sistema mede, mas não paga.
 - ~~Materiais por frente: ficou para a v2~~ → **antecipado em 19/10/2026 (decisão do engenheiro)** numa versão simples: o **Kanban de pedidos de material** (aba "Materiais" dentro de Orçamento), só para o engenheiro. Os logins do almoxarife e da compradora continuam na v2.
 - Mandar mensagens pelo WhatsApp ou ler o WhatsApp dos empreiteiros (eles continuam só no WhatsApp, e o sistema não se liga a ele).
@@ -499,7 +499,7 @@ Assim, **item a item do orçamento**, dá para ver **orçado × contratado × me
 ## Melhorias para a v2
 
 - Login do almoxarife e da compradora no módulo de materiais (o Kanban de pedidos já existe desde 19/10/2026, só para o engenheiro). Ligar o pedido ao levantamento da composição do orçamento e ao custo real. **Ficou mais fácil:** o levantamento já sai da composição do orçamento, e a v2 só precisa acrescentar pedido, entrega e custo real.
-- Importar o cronograma do MS Project: cortado porque, na v1, cadastrar as frentes é mais rápido do que fazer um importador.
+- ~~Importar o cronograma do MS Project~~: voltou em 19/10/2026, como importação de planilha Excel para o Planejamento (ver Fora do escopo).
 - Medição e Portal do cliente: entram logo depois do Primeiro pedaço, em cima das mesmas tabelas.
 
 ---
