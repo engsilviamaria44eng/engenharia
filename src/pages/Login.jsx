@@ -47,7 +47,7 @@ export default function Login({ onEntrar }) {
       <img className="login-logo" src="/logo-fmz-recorte.png" alt="FMZ Incorporadora" />
       <div className="login-caixa">
         <h1>Acompanhamento de obras</h1>
-        <p className="aviso-demo">Versão de demonstração, com dados de exemplo. Escolha com quem entrar.</p>
+        <p className="aviso-demo">Versão de demonstração da FMZ. Escolha com quem entrar.</p>
         {GRUPOS.map((g) => {
           const doGrupo = usuarios.filter((u) => u.role === g.role)
           if (doGrupo.length === 0) return null
