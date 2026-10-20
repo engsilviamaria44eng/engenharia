@@ -83,10 +83,11 @@ git e a Vercel publica sozinha. A pessoa não digita comando.
 
 - **Tabela nova nasce fechada para o app.** Toda tabela precisa de `grant` escrito na
   migration, só para `authenticated`. Erro 42501 é GRANT faltando, não RLS. Nunca
-  `grant all`, nunca `to anon`. **Exceção provisória:** até o Capítulo 15 (Login) o app
-  roda sem login, então as tabelas atuais liberam `anon` com políticas `dev_*` e a
-  marca `publico-de-proposito` na migration. Essas políticas substituem, por enquanto, a
-  RLS por obra (`minhas_obras()`). Não publicar o app antes de fechar isso.
+  `grant all`, nunca `to anon`. **Exceção provisória:** até a Login etapa 2 o app
+  entra sem login, então as tabelas antigas ainda liberam `anon` com políticas `dev_*`
+  (marca `publico-de-proposito` na migration). Desde 20/10/2026 essas políticas valem
+  **só para `anon`**; quem faz login já segue a RLS por obra (`minhas_obras()`,
+  `obras_que_engenheiro()`). Não pôr as chaves do banco na Vercel antes de fechar isso.
 - **Banco:** projeto Supabase `fmz-obras` (sa-east-1); conexão no `.env.local`
   (`VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY`, nunca a service_role).
   O mapa do banco e os provisórios estão em `banco-resumo.md` — leia antes de mexer.
@@ -94,8 +95,10 @@ git e a Vercel publica sozinha. A pessoa não digita comando.
   `list_tables`) e atualize o `banco-resumo.md`. Migration nova vira arquivo em
   `supabase/migrations/` com o mesmo conteúdo aplicado, com nome que ordena na sequência
   em que foi aplicada (`AAAAMMDD-N-assunto.sql`).
-- **Provisórios do back-end:** membros, frentes e login ainda são mock, casados com o
-  banco pelo `codigo` da obra; `pedidos_material.frente` é texto (vira `frente_id`).
+- **Provisórios do back-end:** `profiles` e `membros` já existem no banco (vazias até a
+  Login etapa 2), mas o app ainda entra pela tela de demonstração e usa os membros do mock,
+  casados com o banco pelo `codigo` da obra. Frentes ainda são mock;
+  `pedidos_material.frente` é texto (vira `frente_id`).
 - **Planejamento (Last Planner) já está no banco:** `planejamento_atividades` (restrições e
   subtarefas em jsonb, com CHECK dos tipos e causas) e `planejamento_config` (dias úteis por
   obra; sem linha = padrão). Gravar várias atividades passa pela função

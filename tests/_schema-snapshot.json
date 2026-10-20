@@ -1,62 +1,75 @@
 {
-    "obras":  [
-                  "id",
-                  "codigo",
-                  "nome",
-                  "endereco",
-                  "cliente",
-                  "data_inicio",
-                  "data_entrega",
-                  "situacao",
-                  "created_at",
-                  "updated_at"
-              ],
-    "materiais_catalogo":  [
-                               "id",
-                               "codigo",
-                               "nome",
-                               "unidade",
-                               "categoria",
-                               "created_at",
-                               "updated_at"
-                           ],
-    "pedidos_material":  [
-                             "id",
-                             "obra_id",
-                             "material_id",
-                             "quantidade",
-                             "frente",
-                             "prioridade",
-                             "status",
-                             "fornecedor",
-                             "previsao_entrega",
-                             "historico",
-                             "recebimento",
-                             "created_at",
-                             "updated_at"
-                         ],
-    "planejamento_atividades":  [
-                                    "id",
-                                    "obra_id",
-                                    "pai_id",
-                                    "ordem",
-                                    "titulo",
-                                    "inicio",
-                                    "fim",
-                                    "progresso",
-                                    "status",
-                                    "subtarefas",
-                                    "restricoes",
-                                    "nao_realizado",
-                                    "arquivada",
-                                    "created_at",
-                                    "updated_at"
-                                ],
-    "planejamento_config":  [
-                                "obra_id",
-                                "dias_uteis",
-                                "feriados",
-                                "created_at",
-                                "updated_at"
-                            ]
+    "obras": [
+        "id",
+        "codigo",
+        "nome",
+        "endereco",
+        "cliente",
+        "data_inicio",
+        "data_entrega",
+        "situacao",
+        "created_at",
+        "updated_at"
+    ],
+    "materiais_catalogo": [
+        "id",
+        "codigo",
+        "nome",
+        "unidade",
+        "categoria",
+        "created_at",
+        "updated_at"
+    ],
+    "pedidos_material": [
+        "id",
+        "obra_id",
+        "material_id",
+        "quantidade",
+        "frente",
+        "prioridade",
+        "status",
+        "fornecedor",
+        "previsao_entrega",
+        "historico",
+        "recebimento",
+        "created_at",
+        "updated_at"
+    ],
+    "planejamento_atividades": [
+        "id",
+        "obra_id",
+        "pai_id",
+        "ordem",
+        "titulo",
+        "inicio",
+        "fim",
+        "progresso",
+        "status",
+        "subtarefas",
+        "restricoes",
+        "nao_realizado",
+        "arquivada",
+        "created_at",
+        "updated_at"
+    ],
+    "planejamento_config": [
+        "obra_id",
+        "dias_uteis",
+        "feriados",
+        "created_at",
+        "updated_at"
+    ],
+    "profiles": [
+        "id",
+        "nome",
+        "role",
+        "created_at",
+        "updated_at"
+    ],
+    "membros": [
+        "obra_id",
+        "profile_id",
+        "papel",
+        "created_at"
+    ]
 }
