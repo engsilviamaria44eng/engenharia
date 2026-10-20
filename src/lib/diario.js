@@ -11,10 +11,10 @@
 import { diasEntre } from './datas.js'
 
 export const CLIMAS = [
-  { id: 'sol', rotulo: 'Sol' },
-  { id: 'nublado', rotulo: 'Nublado' },
-  { id: 'chuva', rotulo: 'Chuva' },
-  { id: 'chuva_forte', rotulo: 'Chuva forte' },
+  { id: 'sol', rotulo: 'Sol', icone: '☀' },
+  { id: 'nublado', rotulo: 'Nublado', icone: '☁' },
+  { id: 'chuva', rotulo: 'Chuva', icone: '☂', chuva: true },
+  { id: 'chuva_forte', rotulo: 'Chuva forte', icone: '⛈', chuva: true },
 ]
 
 export const PERIODOS = [

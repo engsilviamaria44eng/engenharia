@@ -591,7 +591,7 @@ button:active{opacity:.82}
 @media (max-width:560px){ .rel-registro{grid-template-columns:1fr} .rel-tabela{display:block;overflow-x:auto} }
 
 /* RELATÓRIOS (BI): painéis, KPIs, Curva S em SVG e donut com conic-gradient */
-:root{--bi-teal:#0E7C86;--bi-teal-claro:rgba(14,124,134,.16)}
+:root{--bi-teal:#0E7C86;--bi-teal-claro:rgba(14,124,134,.16);--bi-trilho:#F1F4F7;--bi-chuva:rgba(46,120,200,.12);--bi-chuva-forte:rgba(46,120,200,.25);--bi-verm-claro:#E39A93}
 /* barra do celular com 8 itens: rótulo e ícone ainda menores */
 .barra-inf.apertada:has(> :nth-child(8)) .nav-item{font-size:10px}
 .barra-inf.apertada:has(> :nth-child(8)) .nav-item .ic{width:36px}
@@ -638,7 +638,7 @@ button:active{opacity:.82}
 .ppc-barras{display:flex;align-items:stretch;gap:8px;min-width:420px;padding-top:4px}
 .ppc-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:36px}
 .ppc-pct{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
-.ppc-trilho{height:150px;width:100%;max-width:44px;display:flex;align-items:flex-end;background:#F1F4F7;border-radius:4px}
+.ppc-trilho{height:150px;width:100%;max-width:44px;display:flex;align-items:flex-end;background:var(--bi-trilho);border-radius:4px}
 .ppc-pilha{width:100%;display:flex;flex-direction:column;border-radius:4px;overflow:hidden}
 .ppc-pilha i{display:block;min-height:4px}
 .ppc-sim{background:var(--verde)}
@@ -646,16 +646,16 @@ button:active{opacity:.82}
 .ppc-sem{font-size:11px;color:var(--texto-2)}
 .pareto,.barras-h{list-style:none;display:flex;flex-direction:column;gap:8px}
 .pareto li,.barras-h li{display:grid;grid-template-columns:minmax(110px,1.2fr) 2fr auto;align-items:center;gap:8px;font-size:14px}
-.pareto-trilho{height:16px;background:#F1F4F7;border-radius:4px;overflow:hidden}
+.pareto-trilho{height:16px;background:var(--bi-trilho);border-radius:4px;overflow:hidden}
 .pareto-trilho i{display:block;height:100%;background:var(--vermelho);border-radius:4px}
-.pareto li:not(:first-child) .pareto-trilho i{background:#E39A93}
+.pareto li:not(:first-child) .pareto-trilho i{background:var(--bi-verm-claro)}
 .pareto-num{font-size:13px;color:var(--texto-2);white-space:nowrap;font-variant-numeric:tabular-nums}
 .pareto-num b{color:var(--texto);font-size:15px}
-.clima-efetivo .fundo-chuva{fill:rgba(46,120,200,.12)}
+.clima-efetivo .fundo-chuva{fill:var(--bi-chuva)}
 .clima-efetivo .col-efetivo{fill:var(--bi-teal)}
 .clima-efetivo .icone-clima{font-size:16px;fill:var(--texto-2)}
 .clima-efetivo .eixo{font-size:11px;fill:var(--texto-2);font-family:var(--sans)}
-.legenda-bi .lg-chuva{background:rgba(46,120,200,.25)}
+.legenda-bi .lg-chuva{background:var(--bi-chuva-forte)}
 /* BI etapa 4: filtros cruzados, qualidade & entrega, impressão */
 .filtros-bi{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 14px;background:var(--cartao);border-radius:var(--raio);box-shadow:var(--sombra);padding:12px 14px;margin-bottom:16px;z-index:5}
 .app[data-desktop="1"] .filtros-bi{position:sticky;top:0}
@@ -668,10 +668,10 @@ button:active{opacity:.82}
 .barras-conforme .pareto-trilho i.baixo{background:var(--acento)}
 .barras-conforme .pareto-rot,.barras-saldo .pareto-rot{display:flex;flex-direction:column;line-height:1.2}
 .barras-conforme .pareto-rot small{font-size:12px;color:var(--texto-2)}
-.barras-gemba .pareto-trilho i{background:#6B7A8F}
+.barras-gemba .pareto-trilho i{background:var(--texto-2)}
 .legenda-bi.legenda-coluna{flex-direction:column;align-items:flex-start}
 .treemap{display:flex;flex-wrap:wrap;gap:4px;min-height:150px}
-.treemap-bloco{flex-basis:120px;min-height:70px;background:var(--vermelho);color:#fff;border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+.treemap-bloco{flex-basis:0;min-width:90px;min-height:70px;background:var(--vermelho);color:#fff;border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
 .treemap-bloco b{font-size:22px;line-height:1}
 .treemap-bloco span{font-size:13px;font-weight:600;overflow-wrap:anywhere}
 .so-impressao{display:none}
@@ -699,7 +699,7 @@ button:active{opacity:.82}
 .tabela-bi th,.tabela-bi td{padding:8px 6px;border-bottom:1px solid var(--linha);text-align:left;vertical-align:middle}
 .tabela-bi th{font-size:12px;color:var(--texto-2);font-weight:700}
 .tabela-bi .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.barra-celula{position:relative;display:block;height:22px;min-width:110px;background:#F1F4F7;border-radius:4px;overflow:hidden}
+.barra-celula{position:relative;display:block;height:22px;min-width:110px;background:var(--bi-trilho);border-radius:4px;overflow:hidden}
 .barra-celula i{position:absolute;inset:0 auto 0 0;background:var(--bi-teal-claro);border-right:3px solid var(--bi-teal)}
 .barra-celula b{position:relative;display:block;padding:0 8px;line-height:22px;font-size:13px}
 .barras-saldo .pareto-trilho i{background:var(--bi-teal)}

@@ -3,7 +3,7 @@ import {
   modulosDoBI, nomeDoModulo, seguro, pctSeguro, curvaS, evolucao, ppcGeral, prazoDaObra, custoMedido, painelExecutivo, pontosDaSerie,
   ppcSemanal, paretoDeCausas, piorClima, climaEEfetivo, painelRitmo,
   painelContratos, matrizDeEmpreiteiros, saldoPorContrato, painelMateriais, pedidosPorEtapa, leadTimeDosPedidos,
-  painelQualidade, conformePorModelo, pendenciasPorEmpresa, empresasDoBI, inicioDoPeriodo, filtrarFontes, descreverFiltrosBI, FILTROS_BI_INICIAIS,
+  painelQualidade, conformePorModelo, pendenciasPorEmpresa, empresasDoBI, inicioDoPeriodo, filtrarFontes, descreverFiltrosBI, FILTROS_BI_INICIAIS, avisoDoFiltro,
 } from '../src/lib/biData.js'
 import { OBRAS, ATIVIDADES_PLANEJAMENTO, CONTRATOS, ITENS_CONTRATO, MEDICOES, PEDIDOS, PENDENCIAS, DIARIOS, MATERIAIS_CATALOGO, VISTORIAS_FVS, NAO_CONFORMIDADES, GEMBA_OBSERVACOES } from '../src/lib/mockData.js'
 import { CONFIG_PADRAO } from '../src/lib/planejamento.js'
@@ -104,7 +104,7 @@ conferir('sem meta nas 8 semanas: null (nada de NaN)', semMeta, null)
 const pareto = paretoDeCausas(atvJE)
 conferir('Pareto: da causa mais frequente para a menos', pareto.causas.map((c) => [c.causa, c.vezes]),
   [['material', 2], ['clima', 1], ['equipamento', 1], ['mao_de_obra', 1], ['projeto', 1], ['servico_anterior', 1]])
-conferir('Pareto: % e acumulado fecham em 100', [pareto.total, pareto.causas[0].pct, pareto.causas.at(-1).acumulado], [7, 29, 100])
+conferir('Pareto: total e % de cada causa', [pareto.total, pareto.causas[0].pct, pareto.causas.at(-1).pct], [7, 29, 14])
 conferir('Pareto sem nenhum não realizado: null', paretoDeCausas(da(ATIVIDADES_PLANEJAMENTO, 'obra-vn')), null)
 conferir('pior clima do dia', [piorClima({ manha: 'sol', tarde: 'chuva', noite: null }), piorClima({ manha: 'nublado' }), piorClima({})], ['chuva', 'nublado', null])
 const ce = climaEEfetivo(da(DIARIOS, 'obra-je'), hoje)
@@ -153,18 +153,24 @@ conferir('painel de qualidade sem o módulo: null', painelQualidade({}), null)
 conferir('empresas do filtro: contratos, pendências e NCs, sem repetir', empresasDoBI(fontesQ), ['Construtora Pereira', 'Drywall Forte', 'Elétrica Luz Forte', 'Gesso & Cia', 'Hidráulica Fluxo', 'Impermeabiliza Já', 'Revest Pisos', 'Silva Alvenarias'])
 conferir('início do período', [inicioDoPeriodo('tudo', hoje), inicioDoPeriodo('mes', hoje), inicioDoPeriodo('4semanas', hoje)], [null, '2026-10-01', '2026-09-28'])
 const soSilva = filtrarFontes(fontesQ, { empresa: 'Silva Alvenarias', periodo: 'tudo' }, hoje)
-conferir('filtro de empresa: contratos, pendências, NCs e Gemba só dela', [soSilva.contratos.length, soSilva.pendencias.length, soSilva.ncs.length, soSilva.gemba.length], [1, 2, 0, 0])
+conferir('filtro de empresa: contratos, pendências e NCs só dela; Gemba (sem empresa) inteiro', [soSilva.contratos.length, soSilva.pendencias.length, soSilva.ncs.length, soSilva.gemba.length], [1, 2, 0, 8])
 conferir('filtro de empresa: medições só dos contratos dela', soSilva.medicoes.length, 0)
 conferir('filtro de empresa não mexe no que não tem empresa', [soSilva.atividades.length, soSilva.diarios.length, soSilva.pedidos.length], [atvJE.length, 14, 9])
 const ult4 = filtrarFontes(fontesQ, { empresa: '', periodo: '4semanas' }, hoje)
 const r4 = painelRitmo(ult4, hoje)
 conferir('4 semanas: PPC só das semanas do período', r4.ppc.semanas.map((s) => s.rotulo), ['28/09', '05/10', '12/10'])
 conferir('4 semanas: a causa de 21/09 sai do Pareto', r4.pareto.causas.some((c) => c.causa === 'equipamento'), false)
-conferir('4 semanas: diários e pedidos do período', [r4.clima.dias.length, ult4.pedidos.length], [14, 7])
+conferir('4 semanas: diários do período; pedidos todos (atrasado não some)', [r4.clima.dias.length, ult4.pedidos.length, painelMateriais(ult4, hoje).atrasados.length], [14, 9, 1])
 conferir('o acumulado não muda com o período', painelExecutivo({ ...ult4, obra: obraJE }, hoje).custo, painelExecutivo({ ...fontesQ, obra: obraJE }, hoje).custo)
 conferir('descrição dos filtros', [descreverFiltrosBI(FILTROS_BI_INICIAIS), descreverFiltrosBI({ empresa: 'Silva Alvenarias', periodo: 'mes' })],
   ['Empresa: todas · Período: Tudo', 'Empresa: Silva Alvenarias · Período: Este mês'])
 conferir('filtro sem dado nenhum não quebra', Object.keys(filtrarFontes({}, FILTROS_BI_INICIAIS, hoje)).includes('desde'), true)
+
+conferir('período não esconde pendência aberta antiga', filtrarFontes(fontesQ, { periodo: 'mes' }, hoje).pendencias.length, da(PENDENCIAS, 'obra-je').length)
+conferir('lead time no período: só o que chegou a partir do corte', leadTimeDosPedidos(da(PEDIDOS, 'obra-je'), hoje, '2026-10-01').pedidos, 1)
+conferir('FVS abaixo de 80% marcada', pq.conforme.map((l) => l.baixo), [true, true])
+conferir('aviso do filtro: só com empresa escolhida', [avisoDoFiltro('ritmo', FILTROS_BI_INICIAIS), typeof avisoDoFiltro('ritmo', { empresa: 'X' }), avisoDoFiltro('contratos', { empresa: 'X' })], [null, 'string', null])
+conferir('clima × efetivo traz o ícone do clima', ce.dias.slice(5, 7).map((d) => d.icone), ['☂', '⛈'])
 
 console.log(`${ok}/${tot} — biData`)
 if (ok !== tot) process.exit(1)

@@ -172,7 +172,7 @@ export function ppcSemanal(atividades, hoje, quantas = 8, desde = null) {
 }
 
 // PARETO DAS CAUSAS: todos os "não realizados" registrados (atividades e subtarefas), da causa
-// mais frequente para a menos, com o % de cada uma e o % acumulado. Com `desde`, só os
+// mais frequente para a menos, com o % de cada uma. Com `desde`, só os
 // registrados em semanas que terminam a partir dessa data.
 export function paretoDeCausas(atividades, desde = null) {
   const contagem = new Map()
@@ -184,10 +184,8 @@ export function paretoDeCausas(atividades, desde = null) {
   }
   const total = [...contagem.values()].reduce((s, n) => s + n, 0)
   if (total === 0) return null
-  let acumulado = 0
-  const causas = [...contagem].map(([causa, vezes]) => ({ causa, rotulo: rotuloCausa(causa), vezes }))
+  const causas = [...contagem].map(([causa, vezes]) => ({ causa, rotulo: rotuloCausa(causa), vezes, pct: pctSeguro(vezes, total) }))
     .sort((x, y) => y.vezes - x.vezes || x.rotulo.localeCompare(y.rotulo, 'pt-BR'))
-    .map((c) => { acumulado += c.vezes; return { ...c, pct: pctSeguro(c.vezes, total), acumulado: pctSeguro(acumulado, total) } })
   return { causas, total, maior: causas[0].vezes }
 }
 
@@ -204,7 +202,8 @@ export function climaEEfetivo(diarios, hoje, quantos = 20) {
   const dias = (diarios ?? []).filter((d) => d.data <= hoje).sort((a, b) => a.data.localeCompare(b.data)).slice(-quantos)
     .map((d) => {
       const clima = piorClima(d.clima)
-      return { data: d.data, rotulo: rotuloDaSemana(d.data), efetivo: totalDoEfetivo(d.efetivo), clima, rotuloClima: rotuloClima(clima) ?? 'Não informado', chuva: clima === 'chuva' || clima === 'chuva_forte' }
+      const c = CLIMAS.find((x) => x.id === clima)
+      return { data: d.data, rotulo: rotuloDaSemana(d.data), efetivo: totalDoEfetivo(d.efetivo), clima, rotuloClima: rotuloClima(clima) ?? 'Não informado', icone: c?.icone ?? '·', chuva: !!c?.chuva }
     })
   if (dias.length === 0) return null
   const total = dias.reduce((s, d) => s + d.efetivo, 0)
@@ -299,9 +298,11 @@ function chegadaAoAlmoxarifado(p) {
 }
 
 // LEAD TIME: média geral (do pedido à chegada ao almoxarifado) e a média por semana de chegada
-// nas 4 últimas semanas (a de hoje incluída). Semana sem chegada fica null ("—").
-export function leadTimeDosPedidos(pedidos, hoje) {
-  const chegados = (pedidos ?? []).map((p) => ({ dias: leadTime(p), chegada: chegadaAoAlmoxarifado(p) })).filter((x) => x.dias !== null && x.chegada)
+// nas 4 últimas semanas (a de hoje incluída). Semana sem chegada fica null ("—"). Com `desde`
+// (filtro de período), a média geral conta só o que CHEGOU a partir dessa data.
+export function leadTimeDosPedidos(pedidos, hoje, desde = null) {
+  const chegados = (pedidos ?? []).map((p) => ({ dias: leadTime(p), chegada: chegadaAoAlmoxarifado(p) }))
+    .filter((x) => x.dias !== null && x.chegada && (!desde || x.chegada >= desde))
   if (chegados.length === 0) return null
   const media = (lista) => (lista.length ? Math.round(lista.reduce((s, x) => s + x.dias, 0) / lista.length) : null)
   const atual = segundaDaSemana(hoje)
@@ -319,11 +320,14 @@ export function painelMateriais(fontes, hoje) {
     etapas: pedidosPorEtapa(fontes.pedidos),
     criticos: fontes.pedidos.filter((p) => p.prioridade === 'critico' && p.status !== 'entregue').length,
     atrasados: pedidosAtrasados(fontes.pedidos, fontes.catalogo, hoje),
-    leadTime: leadTimeDosPedidos(fontes.pedidos, hoje),
+    leadTime: leadTimeDosPedidos(fontes.pedidos, hoje, fontes.desde),
   }
 }
 
 // ---------- qualidade & entrega (Pendências + FVS + Gemba) ----------
+// Abaixo disto, o serviço está gerando retrabalho (a barra fica em alerta).
+export const LIMITE_CONFORME = 80
+
 // % CONFORME POR MODELO DE FVS: OK ÷ (OK + NC) somando as vistorias de cada modelo; o pior primeiro.
 export function conformePorModelo(vistorias) {
   const porModelo = new Map()
@@ -332,13 +336,13 @@ export function conformePorModelo(vistorias) {
     const l = porModelo.get(v.modelo_nome) ?? { modelo: v.modelo_nome, ok: 0, nc: 0, vistorias: 0 }
     porModelo.set(v.modelo_nome, { ...l, ok: l.ok + p.ok, nc: l.nc + p.nc, vistorias: l.vistorias + 1 })
   }
-  const linhas = [...porModelo.values()].filter((l) => l.ok + l.nc > 0).map((l) => ({ ...l, pct: pctSeguro(l.ok, l.ok + l.nc) }))
+  const linhas = [...porModelo.values()].filter((l) => l.ok + l.nc > 0).map((l) => { const pct = pctSeguro(l.ok, l.ok + l.nc); return { ...l, pct, baixo: pct < LIMITE_CONFORME } })
     .sort((a, b) => a.pct - b.pct || a.modelo.localeCompare(b.modelo, 'pt-BR'))
   return linhas.length ? linhas : null
 }
 
-// Cores das fatias do donut (uma por empresa; a 7ª em diante repete).
-export const CORES_BI = ['#0E7C86', '#F2AD21', '#175D8E', '#C2412D', '#6B7A8F', '#2F855A']
+// Cores das fatias do donut (uma por empresa; a 7ª em diante repete): os tokens do index.css.
+export const CORES_BI = ['var(--bi-teal)', 'var(--acento)', 'var(--pri)', 'var(--vermelho)', 'var(--texto-2)', 'var(--verde)']
 
 const abertas = (pendencias) => (pendencias ?? []).filter((p) => p.status !== 'resolvido')
 
@@ -413,10 +417,11 @@ export function empresasDoBI(fontes) {
   return [...new Set(nomes)].sort((a, b) => a.localeCompare(b, 'pt-BR'))
 }
 
-// Aplica os filtros às fontes ANTES dos painéis. Empresa: contratos (e as medições deles),
-// pendências, NCs e Gemba (pelo responsável). Período: o que tem data de acontecimento —
-// diários, pedidos (data do pedido), pendências, vistorias, NCs, Gemba, semanas do PPC e causas.
-// O acumulado (Curva S, evolução, prazo, contratos e saldos) não muda com o período.
+// Aplica os filtros às fontes ANTES dos painéis.
+// Empresa: contratos (e as medições deles), pendências e NCs — os únicos com empresa.
+// Período: o que ACONTECEU num dia — diários, vistorias, Gemba, semanas do PPC, causas e as
+// chegadas do lead time (via `desde`). O que está em aberto não sai com o período (pendências e
+// NCs abertas, pedidos atrasados e críticos), nem o acumulado (Curva S, contratos e saldos).
 export function filtrarFontes(fontes, filtros, hoje) {
   const { empresa = '', periodo = 'tudo' } = filtros ?? {}
   const desde = inicioDoPeriodo(periodo, hoje)
@@ -425,19 +430,28 @@ export function filtrarFontes(fontes, filtros, hoje) {
   const lista = (l, ok) => (Array.isArray(l) ? l.filter(ok) : l)
   const contratos = lista(fontes.contratos, (c) => daEmpresa(c.empreiteiro))
   const ids = new Set((contratos ?? []).map((c) => c.id))
-  const dataDoPedido = (p) => p.historico?.find((h) => h.status === 'solicitar')?.data ?? p.historico?.[0]?.data
   return {
     ...fontes,
     desde,
     contratos,
     medicoes: lista(fontes.medicoes, (m) => ids.has(m.contrato_id)),
-    pendencias: lista(fontes.pendencias, (p) => daEmpresa(p.empresa) && noPeriodo(p.data_vistoria)),
-    ncs: lista(fontes.ncs, (n) => daEmpresa(n.responsavel) && noPeriodo(n.aberta_em)),
-    gemba: lista(fontes.gemba, (g) => daEmpresa(g.responsavel) && noPeriodo(g.data)),
+    pendencias: lista(fontes.pendencias, (p) => daEmpresa(p.empresa)),
+    ncs: lista(fontes.ncs, (n) => daEmpresa(n.responsavel)),
+    gemba: lista(fontes.gemba, (g) => noPeriodo(g.data)),
     vistorias: lista(fontes.vistorias, (v) => noPeriodo(v.data)),
     diarios: lista(fontes.diarios, (d) => noPeriodo(d.data)),
-    pedidos: lista(fontes.pedidos, (p) => noPeriodo(dataDoPedido(p))),
   }
+}
+
+// O aviso de cada painel quando o filtro de empresa não se aplica a parte dele (null = nada a avisar).
+export function avisoDoFiltro(painel, filtros) {
+  if (!filtros?.empresa) return null
+  return {
+    executivo: 'Curva S, evolução e PPC não têm empresa: mostram a obra toda. O custo medido é só desta empresa.',
+    ritmo: 'Planejamento e Diário não têm empresa: mostram a obra toda.',
+    materiais: 'Pedidos não têm empresa: mostram a obra toda.',
+    qualidade: 'FVS e Gemba Walk não registram a empresa: mostram a obra toda. Pendências e NCs são só desta empresa.',
+  }[painel] ?? null
 }
 
 // "Empresa: Silva Alvenarias · Período: Este mês" (para a tela e o cabeçalho da impressão).

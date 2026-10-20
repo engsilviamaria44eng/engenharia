@@ -6,9 +6,9 @@ import { useObra } from '../lib/ObraContext.jsx'
 import { carregarFontesDoBI } from '../lib/dados.js'
 import {
   modulosDoBI, nomeDoModulo, painelExecutivo, painelRitmo, painelContratos, painelMateriais, painelQualidade, pontosDaSerie,
-  filtrarFontes, empresasDoBI, descreverFiltrosBI, PERIODOS_BI, FILTROS_BI_INICIAIS,
+  filtrarFontes, empresasDoBI, descreverFiltrosBI, avisoDoFiltro, PERIODOS_BI, FILTROS_BI_INICIAIS, LIMITE_CONFORME,
 } from '../lib/biData.js'
-import { dataHoraPorExtenso } from '../lib/diario.js'
+import { dataHoraPorExtenso, CLIMAS } from '../lib/diario.js'
 import { formatarReais } from '../lib/medicoes.js'
 import { formatarData, hojeISO } from '../lib/datas.js'
 import { Icon } from '../components/index.jsx'
@@ -97,11 +97,11 @@ function CurvaS({ curva }) {
 }
 
 // ---------- painéis ----------
-function PainelExecutivo({ fontes, hoje, mod, erros }) {
+function PainelExecutivo({ fontes, hoje, mod, erros, aviso }) {
   const ex = painelExecutivo(fontes, hoje)
   const ev = ex.evolucao
   return (
-    <Painel titulo="Executivo" subtitulo="Como está a saúde da obra hoje" modulo="planejamento" liberado={mod.planejamento || mod.medicoes} erro={erros.planejamento}>
+    <Painel titulo="Executivo" subtitulo="Como está a saúde da obra hoje" modulo="planejamento" liberado={mod.planejamento || mod.medicoes} erro={erros.planejamento} aviso={aviso}>
       <div className="kpis-bi">
         <div className={`kpi-bi ${ev ? (ev.adiantada ? 'bom' : 'ruim') : ''}`}>
           <span className="rot">Evolução</span>
@@ -189,8 +189,6 @@ function Pareto({ pareto }) {
   )
 }
 
-const ICONE_CLIMA = { sol: '☀', nublado: '☁', chuva: '☂', chuva_forte: '⛈' }
-
 // Clima × efetivo: colunas = efetivo do dia; ícone em cima = o pior tempo; dia de chuva com fundo azul.
 function ClimaEfetivo({ ce }) {
   const C = 40
@@ -207,7 +205,7 @@ function ClimaEfetivo({ ce }) {
           return (
             <g key={d.data}>
               {d.chuva && <rect x={x} y="0" width={C} height={A + M.t} className="fundo-chuva" />}
-              <text x={x + C / 2} y="16" textAnchor="middle" className="icone-clima">{ICONE_CLIMA[d.clima] ?? '·'}<title>{d.rotuloClima}</title></text>
+              <text x={x + C / 2} y="16" textAnchor="middle" className="icone-clima">{d.icone}<title>{d.rotuloClima}</title></text>
               <rect x={x + 8} y={M.t + A - h} width={C - 16} height={h} rx="3" className="col-efetivo" />
               <text x={x + C / 2} y={M.t + A - h - 4} textAnchor="middle" className="eixo">{d.efetivo}</text>
               <text x={x + C / 2} y={M.t + A + 16} textAnchor="middle" className="eixo">{d.rotulo}</text>
@@ -218,7 +216,7 @@ function ClimaEfetivo({ ce }) {
       <ul className="legenda-bi">
         <li><i style={{ background: 'var(--bi-teal)' }} />Efetivo do dia (pessoas)</li>
         <li><i className="lg-chuva" />Dia de chuva</li>
-        <li>☀ sol · ☁ nublado · ☂ chuva · ⛈ chuva forte</li>
+        <li>{CLIMAS.map((c) => `${c.icone} ${c.rotulo.toLowerCase()}`).join(' · ')}</li>
       </ul>
     </div>
   )
@@ -230,9 +228,9 @@ function PainelRitmo({ fontes, hoje, mod, erros, aviso }) {
     <Painel titulo="Ritmo & Produção" subtitulo="Planejamento semanal e Diário de Obra" modulo="diario"
       liberado={mod.planejamento || mod.diario} erro={erros.planejamento || erros.diario} aviso={aviso}>
       <div className="bloco-bi">
-        <h3 className="titulo-grafico">PPC semanal — últimas 8 semanas{r.ppc && <span className="nota"> · média {r.ppc.media}%</span>}</h3>
-        {r.ppc ? <PpcSemanal ppc={r.ppc} /> : <p className="nota">Nenhuma atividade do Planejamento caiu nas últimas 8 semanas.</p>}
-        <p className="nota nota-bi">Meta não batida = marcada "não realizada" na semana, ou que devia terminar nela e não terminou.</p>
+        <h3 className="titulo-grafico">PPC semanal — {r.ppc ? `${r.ppc.semanas.length} ${r.ppc.semanas.length === 1 ? 'semana fechada' : 'semanas fechadas'}` : 'semanas fechadas'}{r.ppc && <span className="nota"> · média {r.ppc.media}%</span>}</h3>
+        {r.ppc ? <PpcSemanal ppc={r.ppc} /> : <p className="nota">Nenhuma atividade do Planejamento caiu nas semanas fechadas do período.</p>}
+        <p className="nota nota-bi">Meta não batida = marcada "não realizada" na semana, ou que devia terminar nela e não terminou. A semana de hoje ainda não fechou e fica de fora. Aproximado: o app ainda não guarda o Kanban de cada semana.</p>
       </div>
       <div className="bloco-bi">
         <h3 className="titulo-grafico">Pareto das causas do "não realizado"</h3>
@@ -257,7 +255,10 @@ function PainelContratos({ fontes, mod, erros }) {
               <div key={f.status} className={`mini-card st-${f.status}`}>
                 <span className="rot">{f.rotulo}</span>
                 <b>{f.quantidade}</b>
-                <span className="det">{f.valor ? formatarReais(f.valor) : f.quantidade ? 'sem valor ainda' : '—'}</span>
+                <span className="det">
+                  {f.valor ? formatarReais(f.valor) : f.quantidade ? 'sem valor ainda' : '—'}
+                  {f.valor > 0 && f.semValor > 0 && ` + ${f.semValor} sem valor`}
+                </span>
               </div>
             ))}
           </div>
@@ -353,10 +354,10 @@ function PainelMateriais({ fontes, hoje, mod, erros, aviso }) {
   )
 }
 
-function PainelQualidade({ fontes, mod, erros }) {
+function PainelQualidade({ fontes, mod, erros, aviso }) {
   const q = painelQualidade(fontes)
   return (
-    <Painel titulo="Qualidade & Entrega" subtitulo="Pendências, FVS e Gemba Walk" modulo="qualidade" liberado={mod.qualidade} erro={erros.qualidade}>
+    <Painel titulo="Qualidade & Entrega" subtitulo="Pendências, FVS e Gemba Walk" modulo="qualidade" liberado={mod.qualidade} erro={erros.qualidade} aviso={aviso}>
       {q ? (
         <>
           <p className="nota">{q.abertas} {q.abertas === 1 ? 'pendência aberta' : 'pendências abertas'} · {q.ncsAbertas} {q.ncsAbertas === 1 ? 'NC aberta' : 'NCs abertas'}</p>
@@ -368,13 +369,13 @@ function PainelQualidade({ fontes, mod, erros }) {
                   {q.conforme.map((l) => (
                     <li key={l.modelo}>
                       <span className="pareto-rot">{l.modelo}<small>{l.vistorias} {l.vistorias === 1 ? 'vistoria' : 'vistorias'} · {l.nc} NC</small></span>
-                      <span className="pareto-trilho"><i className={l.pct < 80 ? 'baixo' : ''} style={{ width: `${l.pct}%` }} /></span>
+                      <span className="pareto-trilho"><i className={l.baixo ? 'baixo' : ''} style={{ width: `${l.pct}%` }} /></span>
                       <span className="pareto-num"><b>{l.pct}%</b></span>
                     </li>
                   ))}
                 </ol>
               ) : <p className="nota">Nenhum item de FVS respondido como OK ou NC.</p>}
-              <p className="nota nota-bi">Barra laranja: abaixo de 80% (está gerando retrabalho). A FVS não registra a empresa: não muda com esse filtro.</p>
+              <p className="nota nota-bi">Barra amarela: abaixo de {LIMITE_CONFORME}% (está gerando retrabalho).</p>
             </div>
             <div className="bloco-bi">
               <h3 className="titulo-grafico">Pendências abertas por empresa</h3>
@@ -441,6 +442,13 @@ export default function Relatorios() {
 
   useEffect(() => { carregar() }, [obra?.id])
 
+  // Ctrl+P também imprime: o rodapé pega a hora certa antes de abrir a impressão.
+  useEffect(() => {
+    const atualizar = () => setGeradoEm(dataHoraPorExtenso(new Date()))
+    window.addEventListener('beforeprint', atualizar)
+    return () => window.removeEventListener('beforeprint', atualizar)
+  }, [])
+
   const cabecalho = (
     <div className="page-header no-print">
       <h1 className="titulo-tela">Relatórios</h1>
@@ -469,7 +477,6 @@ export default function Relatorios() {
   const algum = Object.values(mod).some(Boolean)
   const fontes = filtrarFontes(todas, filtros, hoje)
   const empresas = empresasDoBI(todas)
-  const semEmpresa = filtros.empresa ? 'Sem empresa nestes dados: mostra a obra toda.' : null
 
   function imprimir() {
     setGeradoEm(dataHoraPorExtenso(new Date()))
@@ -509,17 +516,18 @@ export default function Relatorios() {
 
           <header className="rel-cab so-impressao">
             <img src="/logo-fmz-recorte.png" alt="FMZ Incorporadora" className="rel-logo" />
+            <p><b>FMZ Incorporadora</b></p>
             <h1>RELATÓRIO EXECUTIVO DA OBRA</h1>
             <p><b>{obra ? `${obra.codigo} · ${obra.nome}` : ''}</b></p>
             <p>Data: {formatarData(hoje)} · {descreverFiltrosBI(filtros)}</p>
           </header>
 
           <div className="grade-bi">
-            <PainelExecutivo fontes={fontes} hoje={hoje} mod={mod} erros={dados.erros} />
-            <PainelRitmo fontes={fontes} hoje={hoje} mod={mod} erros={dados.erros} aviso={semEmpresa} />
+            <PainelExecutivo fontes={fontes} hoje={hoje} mod={mod} erros={dados.erros} aviso={avisoDoFiltro('executivo', filtros)} />
+            <PainelRitmo fontes={fontes} hoje={hoje} mod={mod} erros={dados.erros} aviso={avisoDoFiltro('ritmo', filtros)} />
             <PainelContratos fontes={fontes} mod={mod} erros={dados.erros} />
-            <PainelMateriais fontes={fontes} hoje={hoje} mod={mod} erros={dados.erros} aviso={semEmpresa} />
-            <PainelQualidade fontes={fontes} mod={mod} erros={dados.erros} />
+            <PainelMateriais fontes={fontes} hoje={hoje} mod={mod} erros={dados.erros} aviso={avisoDoFiltro('materiais', filtros)} />
+            <PainelQualidade fontes={fontes} mod={mod} erros={dados.erros} aviso={avisoDoFiltro('qualidade', filtros)} />
           </div>
 
           <footer className="rel-rodape so-impressao">Gerado automaticamente em {geradoEm}.</footer>
