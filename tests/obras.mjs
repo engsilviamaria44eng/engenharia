@@ -127,7 +127,7 @@ conferir('sem obra: contratos devolvem erro', (await listarMedicoesDaObra()).dat
 
 // Cada pessoa só vê as obras em que trabalha
 conferir('engenheiro vê as 3 obras', (await listarObrasDoUsuario('u-eng')).data.length, 3)
-conferir('mestre Ricardo vê só o Jardim Europa', (await listarObrasDoUsuario('u-welton')).data.map((o) => o.codigo), ['JE-01'])
+conferir('mestre Welton vê as duas obras dele (e não a CA-03)', (await listarObrasDoUsuario('u-welton')).data.map((o) => o.codigo), ['JE-01', 'VN-02'])
 
 // Qualidade: pendências não vazam entre obras, e o número é contado por obra
 definirObraAtual('obra-je')

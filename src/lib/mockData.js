@@ -27,7 +27,6 @@ export const OBRAS = [
 export const USUARIOS = [
   { id: 'u-eng', nome: 'Silvia Costa', role: 'Engenheiro' },
   { id: 'u-welton', nome: 'Welton Amorim', role: 'Mestre' },
-  { id: 'u-marcos', nome: 'Marcos Dias', role: 'Mestre' },
   { id: 'u-paula', nome: 'Paula Mendes', role: 'Cliente' },
 ]
 
@@ -37,7 +36,7 @@ export const MEMBROS = [
   { obra_id: 'obra-vn', profile_id: 'u-eng', papel: 'Engenheiro' },
   { obra_id: 'obra-ca', profile_id: 'u-eng', papel: 'Engenheiro' },
   { obra_id: 'obra-je', profile_id: 'u-welton', papel: 'Mestre' },
-  { obra_id: 'obra-vn', profile_id: 'u-marcos', papel: 'Mestre' },
+  { obra_id: 'obra-vn', profile_id: 'u-welton', papel: 'Mestre' },
   { obra_id: 'obra-je', profile_id: 'u-paula', papel: 'Cliente' },
 ]
 
@@ -211,7 +210,7 @@ export const PENDENCIAS = [
   { id: 'pq-04', obra_id: 'obra-je', numero: 4, descricao: 'Caixa 4x2 da bancada desalinhada com a do lado.', local: 'Cozinha', pavimento: 'Térreo', empresa: 'Elétrica Luz Forte', prazo: '2026-10-20', responsavel: 'Silvia Costa', data_vistoria: '2026-10-10', vistoriado_por: 'Silvia Costa', status: 'resolvido', foto: '/exemplos/caixa.svg', foto_evidencia: '/exemplos/caixa-corrigida.svg', data_resolucao: '2026-10-17', observacoes: '[17/10/2026 15:20] Silvia Costa: Resolvida, com foto da correção.\n[14/10/2026 08:45] Silvia Costa: Colocada em andamento.' },
   { id: 'pq-05', obra_id: 'obra-je', numero: 5, descricao: 'Respingo de concreto na esquadria de alumínio da fachada.', local: 'Fachada frontal', pavimento: '1º pavimento', empresa: 'Construtora Pereira', prazo: '2026-10-19', responsavel: 'Mestre Welton', data_vistoria: '2026-10-17', vistoriado_por: 'Silvia Costa', status: 'pendente', foto: '/exemplos/respingo.svg', foto_evidencia: null, data_resolucao: null, observacoes: '' },
   { id: 'pq-06', obra_id: 'obra-je', numero: 6, descricao: 'Eletroduto amassado na laje antes da concretagem.', local: 'Laje', pavimento: '2º pavimento', empresa: 'Elétrica Luz Forte', prazo: '2026-10-24', responsavel: 'Mestre Welton', data_vistoria: '2026-10-18', vistoriado_por: 'Mestre Welton', status: 'em_andamento', foto: '/exemplos/eletroduto.svg', foto_evidencia: null, data_resolucao: null, observacoes: '[18/10/2026 17:10] Mestre Welton: Colocada em andamento.' },
-  { id: 'pq-07', obra_id: 'obra-vn', numero: 1, descricao: 'Bloco quebrado na 3ª fiada do muro de divisa.', local: 'Área externa', pavimento: '', empresa: 'Equipe Mendes', prazo: '2026-10-28', responsavel: 'Mestre Marcos', data_vistoria: '2026-10-16', vistoriado_por: 'Mestre Marcos', status: 'pendente', foto: '/exemplos/muro.svg', foto_evidencia: null, data_resolucao: null, observacoes: '' },
+  { id: 'pq-07', obra_id: 'obra-vn', numero: 1, descricao: 'Bloco quebrado na 3ª fiada do muro de divisa.', local: 'Área externa', pavimento: '', empresa: 'Equipe Mendes', prazo: '2026-10-28', responsavel: 'Mestre Welton', data_vistoria: '2026-10-16', vistoriado_por: 'Mestre Welton', status: 'pendente', foto: '/exemplos/muro.svg', foto_evidencia: null, data_resolucao: null, observacoes: '' },
   { id: 'pq-08', obra_id: 'obra-vn', numero: 2, descricao: 'Contrapiso com desnível na porta da cozinha.', local: 'Cozinha', pavimento: 'Térreo', empresa: 'Equipe própria', prazo: '2026-10-22', responsavel: 'Silvia Costa', data_vistoria: '2026-10-14', vistoriado_por: 'Silvia Costa', status: 'em_andamento', foto: null, foto_evidencia: null, data_resolucao: null, observacoes: '' },
 ]
 
@@ -341,8 +340,8 @@ export const GEMBA_OBSERVACOES = [
   { id: 'gb-06', obra_id: 'obra-je', data: '2026-10-08', registrado_por: 'Silvia Costa', local: 'Portaria', descricao: 'Material conferido duas vezes: na portaria e de novo no almoxarifado.', causa_raiz: 'Ninguém sabia quem era o responsável pela conferência.', acao: 'Conferir só no almoxarifado, com a nota fiscal.', desperdicios: ['Processo desnecessário'], prazo: '2026-10-15', responsavel: 'Silvia Costa', status: 'resolvido', foto: null },
   { id: 'gb-07', obra_id: 'obra-je', data: '2026-10-18', registrado_por: 'Silvia Costa', local: '2º pavimento', descricao: 'Pedreiro desce 3 vezes por hora para buscar ferramenta no térreo.', causa_raiz: 'Ferramentas guardadas só no térreo.', acao: 'Uma caixa de ferramentas por pavimento.', desperdicios: ['Movimentação'], prazo: '2026-10-19', responsavel: 'Mestre Welton', status: 'em_andamento', foto: null },
   { id: 'gb-08', obra_id: 'obra-je', data: '2026-10-06', registrado_por: 'Silvia Costa', local: 'Sala · Térreo', descricao: 'Fiação passada antes da tubulação ser conferida; foi puxada de novo.', causa_raiz: 'Etapa de conferência da tubulação pulada.', acao: 'Liberar fiação só com a tubulação conferida na FVS.', desperdicios: ['Retrabalho', 'Espera'], prazo: '2026-10-12', responsavel: 'Elétrica Luz Forte', status: 'resolvido', foto: '/exemplos/eletroduto.svg' },
-  { id: 'gb-09', obra_id: 'obra-vn', data: '2026-10-16', registrado_por: 'Mestre Marcos', local: 'Laje do térreo', descricao: 'Concreto chegou 1 h atrasado e a equipe ficou parada.', causa_raiz: 'Usina sem confirmação na véspera.', acao: 'Confirmar a usina na véspera, às 16 h.', desperdicios: ['Espera'], prazo: '2026-10-23', responsavel: 'Silvia Costa', status: 'pendente', foto: null },
-  { id: 'gb-10', obra_id: 'obra-vn', data: '2026-10-10', registrado_por: 'Silvia Costa', local: 'Área externa', descricao: 'Blocos do muro levados de carrinho de um lado a outro do terreno.', causa_raiz: 'Descarga no lado oposto ao muro.', acao: 'Descarregar junto ao muro.', desperdicios: ['Transporte'], prazo: '2026-10-14', responsavel: 'Mestre Marcos', status: 'resolvido', foto: '/exemplos/muro.svg' },
+  { id: 'gb-09', obra_id: 'obra-vn', data: '2026-10-16', registrado_por: 'Mestre Welton', local: 'Laje do térreo', descricao: 'Concreto chegou 1 h atrasado e a equipe ficou parada.', causa_raiz: 'Usina sem confirmação na véspera.', acao: 'Confirmar a usina na véspera, às 16 h.', desperdicios: ['Espera'], prazo: '2026-10-23', responsavel: 'Silvia Costa', status: 'pendente', foto: null },
+  { id: 'gb-10', obra_id: 'obra-vn', data: '2026-10-10', registrado_por: 'Silvia Costa', local: 'Área externa', descricao: 'Blocos do muro levados de carrinho de um lado a outro do terreno.', causa_raiz: 'Descarga no lado oposto ao muro.', acao: 'Descarregar junto ao muro.', desperdicios: ['Transporte'], prazo: '2026-10-14', responsavel: 'Mestre Welton', status: 'resolvido', foto: '/exemplos/muro.svg' },
 ]
 
 // ---------- DIÁRIO DE OBRA (RDO) ----------
@@ -361,7 +360,7 @@ const somaEfetivo = (servicos) => servicos.reduce((tot, s) => { for (const [f, q
 const semEfetivo = (servicos) => servicos.map((s) => { const c = { ...s }; delete c.efetivo; return c })
 const rdo = (id, obra_id, data, [manha, tarde, noite], servicos, extra = {}) => ({
   id, obra_id, data, clima: { manha, tarde, noite }, efetivo: somaEfetivo(servicos), servicos: semEfetivo(servicos), fotos: [], equipamentos: equipJE(), ocorrencias: '',
-  lancado_por: obra_id === 'obra-je' ? 'Welton Amorim' : 'Marcos Dias', lancado_em: data, ...extra,
+  lancado_por: 'Welton Amorim', lancado_em: data, ...extra,
 })
 const alv = { Pedreiro: 3, Servente: 2 }
 const alv4 = { Pedreiro: 4, Servente: 2 }

@@ -644,10 +644,9 @@ Data de referência: hoje = **18/10/2026**. São **duas obras**, para provar que
 **Empreiteiros:** Silva Alvenarias · Construtora Pereira (estrutura) · Elétrica Luz Forte · Gesso & Cia.
 
 **Usuários**
-- Engenheiro (membro das duas obras).
-- Mestre Ricardo Alves (só Jardim Europa).
-- Mestre Marcos Dias (só Vila Nova).
-- Cliente Paula Mendes (só Jardim Europa).
+- Engenheira Silvia Costa (membro das obras).
+- Mestre Welton Amorim (Jardim Europa e Vila Nova; o mestre Marcos Dias foi retirado em 20/10/2026).
+- Proprietário (perfil Cliente) da Jardim Europa: digita o próprio nome no login.
 
 **Frentes** (avanço e histórico, para gerar cada situação do painel)
 
