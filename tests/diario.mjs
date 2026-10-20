@@ -91,12 +91,12 @@ conferir('avanço igual ou maior não pergunta', avancosMenores(base, je, fje), 
 
 // ---------- montar e a lista ----------
 const comEfetivo = { ...base, efetivo: { Pedreiro: 2, Pintor: 0 }, servicos: base.servicos.map((s) => (s.frente_id === 'f-alv' ? { ...s, detalhe: ' parede da escada ' } : s)) }
-const m = montarDiario(comEfetivo, { usuario: 'Ricardo Alves', hoje })
+const m = montarDiario(comEfetivo, { usuario: 'Welton Amorim', hoje })
 conferir('montar: só a frente marcada, avanço em número, sem efetivo no serviço', m.servicos, [{ frente_id: 'f-alv', avanco: 65, concluido: false, detalhe: 'parede da escada' }])
 conferir('montar: o efetivo é do dia, sem zeros', m.efetivo, { Pedreiro: 2 })
-conferir('montar: quem e quando lançou', [m.lancado_por, m.lancado_em, m.data], ['Ricardo Alves', hoje, hoje])
+conferir('montar: quem e quando lançou', [m.lancado_por, m.lancado_em, m.data], ['Welton Amorim', hoje, hoje])
 conferir('montar: concluído grava 100', montarDiario({ ...base, servicos: base.servicos.map((s) => (s.frente_id === 'f-alv' ? { ...s, concluido: true, avanco: '70' } : s)) }, { usuario: 'R', hoje }).servicos[0].avanco, 100)
-conferir('editar mantém quem lançou', montarDiario({ ...editar, lancado_por: 'Ricardo Alves', lancado_em: '2026-10-16' }, { usuario: 'Engenheiro', hoje }).lancado_por, 'Ricardo Alves')
+conferir('editar mantém quem lançou', montarDiario({ ...editar, lancado_por: 'Welton Amorim', lancado_em: '2026-10-16' }, { usuario: 'Silvia Costa', hoje }).lancado_por, 'Welton Amorim')
 conferir('lista do mais recente ao mais antigo', ordenarDiarios(je).slice(0, 3).map((d) => d.data), ['2026-10-17', '2026-10-16', '2026-10-15'])
 conferir('linha do dia', resumoDoDia(je.find((d) => d.data === '2026-10-16'), inicioJE), { rdo: 138, clima: 'Sol · Sol · —', frentes: 2, foras: 0, efetivo: 7, fotos: 1, fotosEscondidas: 1, atrasado: false })
 conferir('lançado depois do dia aparece como atrasado', resumoDoDia({ ...je[0], lancado_em: '2026-10-18' }, inicioJE).atrasado, true)
@@ -120,7 +120,7 @@ const marcar = (form, valor) => ({ ...form, servicos: form.servicos.map((s) => (
 const ctxEng = { hoje, inicioObra: inicioJE, papel: 'Engenheiro', diarios: je, frentes: fje }
 conferir('atrasado: avanço entre o dia anterior e o seguinte passa', validarDiario(marcar(sete, '37'), ctxEng), null)
 conferir('atrasado: passar do diário seguinte é recusado', validarDiario(marcar(sete, '45'), ctxEng).servicos['f-alv'], 'Em 05/10 esta frente já estava em 38%. O valor tem que ficar entre 35% e 38%.')
-conferir('atrasado: lançado agora, marcado como atrasado', resumoDoDia(montarDiario(marcar(sete, '37'), { usuario: 'Engenheiro', hoje }), inicioJE).atrasado, true)
+conferir('atrasado: lançado agora, marcado como atrasado', resumoDoDia(montarDiario(marcar(sete, '37'), { usuario: 'Silvia Costa', hoje }), inicioJE).atrasado, true)
 conferir('exemplo passado a limpo (30/09) aparece como atrasado', resumoDoDia(je.find((d) => d.data === '2026-09-30'), inicioJE).atrasado, true)
 
 // ---------- dias sem diário ----------
@@ -137,7 +137,7 @@ const comFora = { ...novo, foras: [fora] }
 conferir('só a atividade fora do orçamento já vale como diário', validarDiario(comFora, ctx), null)
 conferir('atividade fora sem descrição', validarDiario({ ...novo, foras: [{ ...fora, descricao: '' }] }, ctx).foras['fo-x'], 'Descreva a atividade.')
 conferir('quantidade que não é número', validarDiario({ ...novo, foras: [{ ...fora, quantidade: 'abc' }] }, ctx).foras['fo-x'], 'Quantidade tem que ser um número maior que zero (ou deixe em branco).')
-const mFora = montarDiario(comFora, { usuario: 'Ricardo Alves', hoje }).servicos[0]
+const mFora = montarDiario(comFora, { usuario: 'Welton Amorim', hoje }).servicos[0]
 conferir('montar: fora do orçamento com quantidade em número e para analisar, sem efetivo', [mFora.fora_orcamento, mFora.descricao, mFora.quantidade, 'efetivo' in mFora, mFora.analise], [true, 'Demolição de mureta', 4.5, false, 'para_analisar'])
 conferir('efetivo do dia vem do diário, não dos serviços', efetivoDoDia({ efetivo: { Servente: 2 }, servicos: [mFora] }).total, 2)
 conferir('mais e menos no efetivo do dia', mudarEfetivo(mudarEfetivo({ efetivo: {} }, 'Servente', 1), 'Servente', 1).efetivo, { Servente: 2 })

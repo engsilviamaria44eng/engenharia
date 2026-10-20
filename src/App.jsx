@@ -1,7 +1,8 @@
 // Escolhe a casca pelo perfil. A obra atual envolve tudo (ObraProvider), e a casca
 // REMONTA quando a obra muda (key={obra.id}): nada da obra anterior sobra na tela.
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ObraProvider, useObra } from './lib/ObraContext.jsx'
+import { listarUsuariosDemo } from './lib/dados.js'
 import Login from './pages/Login.jsx'
 import AppEngenheiro from './pages/AppEngenheiro.jsx'
 import AppMestre from './pages/AppMestre.jsx'
@@ -33,6 +34,19 @@ export default function App() {
     try { localStorage.removeItem(CHAVE_SESSAO) } catch { /* nada a limpar */ }
     setUsuario(null)
   }
+
+  // Sessão guardada de antes de uma mudança no cadastro: pessoa que não existe mais volta ao
+  // login; nome que mudou é atualizado (o proprietário mantém o nome que digitou).
+  const usuarioId = usuario?.id
+  useEffect(() => {
+    if (!usuarioId) return
+    listarUsuariosDemo().then(({ data }) => {
+      const atual = (data || []).find((u) => u.id === usuarioId)
+      const guardado = lerSessao()
+      if (!atual) sair()
+      else if (atual.role !== 'Cliente' && guardado && guardado.nome !== atual.nome) entrar({ ...guardado, nome: atual.nome })
+    })
+  }, [usuarioId])
 
   if (!usuario) return <Login onEntrar={entrar} />
   return (

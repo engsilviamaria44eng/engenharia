@@ -39,3 +39,18 @@ export function daObra(lista, obraId) {
 export function podeTrocarDeObra(obrasPermitidas) {
   return (obrasPermitidas?.length ?? 0) > 1
 }
+
+// Nome que o proprietário digita no login de demonstração: obrigatório, de 3 a 60 letras,
+// sem espaços sobrando. Devolve { nome } limpo ou { erro }.
+export function validarNomeDigitado(texto) {
+  const nome = (texto ?? '').trim().replace(/\s+/g, ' ')
+  if (!nome) return { erro: 'Digite o seu nome.' }
+  if (nome.length < 3) return { erro: 'O nome precisa ter pelo menos 3 letras.' }
+  if (nome.length > 60) return { erro: 'O nome pode ter até 60 letras.' }
+  return { nome }
+}
+
+// Como o papel aparece na tela: o perfil "Cliente" é o proprietário da obra.
+export function rotuloDoPapel(role) {
+  return role === 'Cliente' ? 'Proprietário' : role
+}

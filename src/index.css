@@ -193,6 +193,8 @@ button:active{opacity:.82}
 .perfil .inicial{width:40px;height:40px;border-radius:50%;background:var(--pri-claro);color:var(--pri);font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
 .perfil b{display:block;font-size:17px}
 .perfil span.det{font-size:14px;color:var(--texto-2)}
+.perfil-nome{display:flex;flex-direction:column;gap:8px;padding:12px;border:2px solid var(--linha);border-radius:var(--raio)}
+.perfil-nome .det{font-size:14px;color:var(--texto-2)}
 
 /* ---------- dados da obra ---------- */
 .dados{display:grid;grid-template-columns:1fr;gap:12px}

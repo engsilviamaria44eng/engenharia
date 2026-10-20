@@ -1,6 +1,6 @@
 // Regra multi-obra: em qual obra o app abre, e que nenhum dado de outra obra vaza.
 // Node puro: node tests/obras.mjs
-import { escolherObraInicial, daObra, podeTrocarDeObra, chaveObraGuardada } from '../src/lib/obras.js'
+import { escolherObraInicial, daObra, podeTrocarDeObra, chaveObraGuardada, validarNomeDigitado, rotuloDoPapel } from '../src/lib/obras.js'
 import { definirObraAtual, listarFrentes, listarObrasDoUsuario, listarPedidos, criarPedido, salvarPedido,
   listarAtividadesPlanejamento, criarAtividadePlanejamento, salvarAtividadesPlanejamento,
   lerConfigPlanejamento, salvarConfigPlanejamento,
@@ -127,7 +127,7 @@ conferir('sem obra: contratos devolvem erro', (await listarMedicoesDaObra()).dat
 
 // Cada pessoa só vê as obras em que trabalha
 conferir('engenheiro vê as 3 obras', (await listarObrasDoUsuario('u-eng')).data.length, 3)
-conferir('mestre Ricardo vê só o Jardim Europa', (await listarObrasDoUsuario('u-ricardo')).data.map((o) => o.codigo), ['JE-01'])
+conferir('mestre Ricardo vê só o Jardim Europa', (await listarObrasDoUsuario('u-welton')).data.map((o) => o.codigo), ['JE-01'])
 
 // Qualidade: pendências não vazam entre obras, e o número é contado por obra
 definirObraAtual('obra-je')
@@ -193,5 +193,13 @@ definirObraAtual('obra-ca')
 conferir('Alphaville: nenhum diário', (await listarDiarios()).data, [])
 definirObraAtual(null)
 conferir('sem obra: diário devolve erro', (await listarDiarios()).data, null)
+// ---------- nome digitado pelo proprietário no login ----------
+conferir('nome do proprietário: limpa espaços', validarNomeDigitado('  Paula   Mendes '), { nome: 'Paula Mendes' })
+conferir('nome do proprietário: vazio', validarNomeDigitado('   '), { erro: 'Digite o seu nome.' })
+conferir('nome do proprietário: curto demais', validarNomeDigitado('Al'), { erro: 'O nome precisa ter pelo menos 3 letras.' })
+conferir('nome do proprietário: comprido demais', validarNomeDigitado('a'.repeat(61)).erro, 'O nome pode ter até 60 letras.')
+
+conferir('papel na tela: Cliente aparece como Proprietário', ['Cliente', 'Mestre', 'Engenheiro'].map(rotuloDoPapel), ['Proprietário', 'Mestre', 'Engenheiro'])
+
 console.log(`${ok}/${tot} — obras`)
 process.exit(ok === tot ? 0 : 1)

@@ -174,7 +174,7 @@ const qPass = quadroDeRestricoes(passada, hoje).quadro[0].cartoes.find((x) => x.
 conferir('aberta de semana passada cai nesta semana, vencida', [qPass.deSemanaPassada, qPass.vencida], [true, true])
 const arquivada = je.map((a) => (a.id === 'at-03' ? { ...a, arquivada: true } : a))
 conferir('atividade arquivada some do quadro', quadroDeRestricoes(arquivada, hoje).quadro[0].cartoes.map((x) => x.restricao.id), ['rs-04'])
-conferir('responsáveis em ordem', responsaveisDasRestricoes(je), ['Compras', 'Engenheiro', 'Mestre Ricardo'])
+conferir('responsáveis em ordem', responsaveisDasRestricoes(je), ['Compras', 'Mestre Welton', 'Silvia Costa'])
 
 const dr = { atividade_id: 'at-09', descricao: ' Falta registro ', tipo: 'material', prazo: '2026-10-29', responsavel: ' Compras ' }
 conferir('restrição válida', validarRestricao(dr), {})

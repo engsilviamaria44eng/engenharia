@@ -2,6 +2,7 @@
 // e a tela atual. Navegação por estado, sem endereço no navegador.
 import { useState } from 'react'
 import { CabecalhoObra, Navegacao, useDesktop } from '../components/index.jsx'
+import { rotuloDoPapel } from '../lib/obras.js'
 
 export default function Casca({ usuario, onSair, menu, telas, inicial }) {
   const desktop = useDesktop()
@@ -20,7 +21,7 @@ export default function Casca({ usuario, onSair, menu, telas, inicial }) {
         <div className="conteudo">
           <Tela goto={goto} params={rota.params} usuario={usuario} />
           {!desktop && (
-            <button className="sair-celular" onClick={onSair}>Sair · {usuario.nome} ({usuario.role})</button>
+            <button className="sair-celular" onClick={onSair}>Sair · {usuario.nome} ({rotuloDoPapel(usuario.role)})</button>
           )}
         </div>
       </main>

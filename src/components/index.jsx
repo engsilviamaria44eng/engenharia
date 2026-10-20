@@ -1,7 +1,7 @@
 // Peças reutilizáveis da interface.
 import { useEffect, useState } from 'react'
 import { useObra } from '../lib/ObraContext.jsx'
-import { classeSituacao, podeTrocarDeObra } from '../lib/obras.js'
+import { classeSituacao, podeTrocarDeObra, rotuloDoPapel } from '../lib/obras.js'
 import { formatarData } from '../lib/datas.js'
 import { corDaFrente, etiquetaDaFrente } from '../lib/painel.js'
 
@@ -124,7 +124,7 @@ export function Navegacao({ itens, atual, goto, desktop, usuario, onSair }) {
         <div className="nome-app">FMZ Incorporadora<span>Acompanhamento de obras</span></div>
         <nav aria-label="Telas">{botoes}</nav>
         <div className="rodape">
-          <span><b>{usuario.nome}</b> · {usuario.role}</span>
+          <span><b>{usuario.nome}</b> · {rotuloDoPapel(usuario.role)}</span>
           <button onClick={onSair}>Sair</button>
         </div>
       </aside>
