@@ -29,8 +29,12 @@ todos sobre `src/pages/Casca.jsx`. Fonte das decisões: `PLANO-DO-PROJETO.md`, `
   diferentes de propósito (JE-01 com atraso, VN-02 no prazo, CA-03 parada e vazia).
   O `tests/obras.mjs` prova que nenhuma frente vaza entre obras — todo módulo novo
   acrescenta lá a conferência dele.
-- No banco (etapa do Supabase): tabela `membros` (obra, pessoa, papel) e a mesma política
-  RLS em toda tabela, via uma função `minhas_obras()` usada com `(select ...)`.
+- No banco: tabela `membros` (obra, pessoa, papel) e a RLS por obra em toda tabela, sempre
+  via função usada com `(select ...)`: `minhas_obras()` para o que todo membro vê (obras) e
+  `obras_que_engenheiro()` para o que é só do engenheiro (pedidos, planejamento, catálogo).
+  Tabela nova escolhe uma das duas; nada de `using (true)`.
+- **Papel em duas colunas:** `profiles.role` decide a casca (qual tela abre) e
+  `membros.papel` decide os dados de cada obra. Quem grava uma grava a outra.
 
 ## Onde o código novo vai
 

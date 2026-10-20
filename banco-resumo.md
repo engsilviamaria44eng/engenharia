@@ -25,8 +25,9 @@ Atualize este arquivo toda vez que uma tabela nova nascer.
 | `profiles` | Uma linha por pessoa com login: nome e papel (Engenheiro, Mestre ou Cliente = proprietário). Nasce sozinha quando a conta é criada, **sempre como Cliente**; promover é pelo painel ou por função no servidor. | Não — é a pessoa. |
 | `membros` | Quem trabalha em qual obra, e com que papel. É ela que decide o que cada pessoa enxerga. | **Sim** — uma linha por pessoa e obra. |
 
-Toda tabela tem `id` (um código único gerado pelo banco), `created_at` (quando nasceu) e
-`updated_at` (última alteração, atualizado sozinho).
+As tabelas de lançamento têm `id` (um código único gerado pelo banco), `created_at` (quando nasceu)
+e `updated_at` (última alteração, atualizado sozinho). Exceções: em `profiles` o `id` é o mesmo
+da conta de login; `membros` não tem `id` nem `updated_at` (a chave é obra + pessoa).
 
 **Regras que o próprio banco garante** (mesmo se o app errar):
 - status, prioridade, categoria e situação só aceitam os valores da lista acima
@@ -59,10 +60,25 @@ Toda tabela tem `id` (um código único gerado pelo banco), `created_at` (quando
 as regras `dev_*` (agora só para `anon`): lê obras e catálogo, e lê, cria e altera pedidos e
 Planejamento. Ela **fecha na Login etapa 2**, junto com a tela de login de verdade.
 
+**Combinados para as próximas etapas:**
+- **A primeira engenheira entra à mão.** Toda conta nasce Cliente e sem obra. Até o Convidar
+  (etapa 3), quem ganha papel e obra é por SQL ou pelo Table Editor: `profiles.role` e uma
+  linha em `membros` por obra. Sem isso, a pessoa entra e vê zero obras.
+- **Papel: duas colunas, uma regra.** `profiles.role` decide qual tela abre (engenheiro,
+  mestre ou proprietário); `membros.papel` decide os dados de cada obra. Elas têm que
+  combinar: quem muda uma, muda a outra (o Convidar da etapa 3 grava as duas juntas).
+- **O engenheiro vê só as obras em que é membro.** Criar obra pelo app (e já entrar como
+  membro dela) e apagar registros ainda não têm regra para quem fez login: vêm com as
+  telas que precisarem (Nova obra na etapa 3).
+- **A porta `dev_*` fecha na etapa 2** (migration `20261020-2`): apagar as 11 políticas
+  `dev_*` e tirar os grants de `anon`. Sem login: nada.
+
 ⚠️ **Não ponha as chaves do banco na Vercel antes da etapa 2.** O site no ar hoje é uma
 vitrine sem banco (só dados de exemplo).
 
-Testado em 20/10/2026 com pessoas de teste (apagadas depois): o engenheiro da JE-01 não vê
+Testado em 20/10/2026 com pessoas de teste **logadas** (apagadas depois). Vale só para quem fez
+login: enquanto a porta `dev_*` estiver aberta, quem usa só a chave pública ainda passa por fora
+dessas regras. O engenheiro da JE-01 não vê
 nem altera a VN-02 (nem com o código da obra na mão); o mestre não cria pedido; o mestre não
 se promove a engenheiro; o proprietário não se coloca em outra obra; quem se cadastra dizendo
 "Engenheiro" nasce Cliente.

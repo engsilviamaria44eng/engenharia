@@ -5,7 +5,8 @@
 -- O que muda para quem FEZ LOGIN (authenticated): só vê as obras em que é membro;
 -- pedidos de material e Planejamento, só o engenheiro da obra.
 -- O que NÃO muda ainda: quem não fez login (anon) continua com a porta de
--- desenvolvimento (políticas dev_*, agora só para anon) até a ETAPA 2, quando a tela
+-- desenvolvimento (políticas dev_*, agora só para anon; publico-de-proposito, provisório)
+-- até a ETAPA 2, quando a tela
 -- de login entra e a porta fecha junto (migration 20261020-2). Assim o app nunca
 -- fica quebrado entre uma etapa e outra.
 -- ============================================================================

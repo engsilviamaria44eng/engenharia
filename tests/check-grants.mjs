@@ -57,6 +57,10 @@ for (const { f, sql } of textos) {
   if (/grant\s+[^;]*\bto\s+[^;]*\banon\b/.test(s) && !sql.includes('publico-de-proposito')) {
     problemas.push(`[ANON] ${f}: libera tabela para quem não fez login. Se é de propósito, escreva "-- publico-de-proposito" no arquivo`)
   }
+  // Política (create/alter policy) aberta para anon também libera: mesma marca exigida.
+  if (/(?:create|alter)\s+policy\s+[^;]*\bto\s+[^;]*\banon\b/.test(s) && !sql.includes('publico-de-proposito')) {
+    problemas.push(`[ANON] ${f}: política aberta para quem não fez login. Se é de propósito, escreva "-- publico-de-proposito" no arquivo`)
+  }
 }
 
 if (problemas.length) {
