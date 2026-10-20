@@ -634,6 +634,90 @@ button:active{opacity:.82}
 .legenda-bi li{display:inline-flex;align-items:center;gap:6px}
 .legenda-bi i{display:inline-block;width:14px;height:10px;border-radius:3px}
 .legenda-bi .lg-plan{height:0;border-top:3px dashed #8A9AA8;border-radius:0}
+/* BI etapa 2: PPC semanal (colunas empilhadas), Pareto (barras deitadas), clima × efetivo (SVG) */
+.ppc-barras{display:flex;align-items:stretch;gap:8px;min-width:420px;padding-top:4px}
+.ppc-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:36px}
+.ppc-pct{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.ppc-trilho{height:150px;width:100%;max-width:44px;display:flex;align-items:flex-end;background:#F1F4F7;border-radius:4px}
+.ppc-pilha{width:100%;display:flex;flex-direction:column;border-radius:4px;overflow:hidden}
+.ppc-pilha i{display:block;min-height:4px}
+.ppc-sim{background:var(--verde)}
+.ppc-nao{background:var(--vermelho)}
+.ppc-sem{font-size:11px;color:var(--texto-2)}
+.pareto,.barras-h{list-style:none;display:flex;flex-direction:column;gap:8px}
+.pareto li,.barras-h li{display:grid;grid-template-columns:minmax(110px,1.2fr) 2fr auto;align-items:center;gap:8px;font-size:14px}
+.pareto-trilho{height:16px;background:#F1F4F7;border-radius:4px;overflow:hidden}
+.pareto-trilho i{display:block;height:100%;background:var(--vermelho);border-radius:4px}
+.pareto li:not(:first-child) .pareto-trilho i{background:#E39A93}
+.pareto-num{font-size:13px;color:var(--texto-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.pareto-num b{color:var(--texto);font-size:15px}
+.clima-efetivo .fundo-chuva{fill:rgba(46,120,200,.12)}
+.clima-efetivo .col-efetivo{fill:var(--bi-teal)}
+.clima-efetivo .icone-clima{font-size:16px;fill:var(--texto-2)}
+.clima-efetivo .eixo{font-size:11px;fill:var(--texto-2);font-family:var(--sans)}
+.legenda-bi .lg-chuva{background:rgba(46,120,200,.25)}
+/* BI etapa 4: filtros cruzados, qualidade & entrega, impressão */
+.filtros-bi{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 14px;background:var(--cartao);border-radius:var(--raio);box-shadow:var(--sombra);padding:12px 14px;margin-bottom:16px;z-index:5}
+.app[data-desktop="1"] .filtros-bi{position:sticky;top:0}
+.filtros-bi .campo-empresa{flex:1 1 220px;max-width:340px}
+.filtros-bi > .nota{flex-basis:100%;margin:0}
+.chips-periodo{display:flex;flex-wrap:wrap;gap:6px}
+.link-limpar{background:none;border:0;padding:0;min-height:0;color:var(--pri);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+.aviso-filtro{font-size:13px;color:var(--ocre-texto);background:var(--fundo-ocre);border-radius:var(--raio-p,6px);padding:4px 10px;margin:0}
+.barras-conforme .pareto-trilho i{background:var(--bi-teal)}
+.barras-conforme .pareto-trilho i.baixo{background:var(--acento)}
+.barras-conforme .pareto-rot,.barras-saldo .pareto-rot{display:flex;flex-direction:column;line-height:1.2}
+.barras-conforme .pareto-rot small{font-size:12px;color:var(--texto-2)}
+.barras-gemba .pareto-trilho i{background:#6B7A8F}
+.legenda-bi.legenda-coluna{flex-direction:column;align-items:flex-start}
+.treemap{display:flex;flex-wrap:wrap;gap:4px;min-height:150px}
+.treemap-bloco{flex-basis:120px;min-height:70px;background:var(--vermelho);color:#fff;border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+.treemap-bloco b{font-size:22px;line-height:1}
+.treemap-bloco span{font-size:13px;font-weight:600;overflow-wrap:anywhere}
+.so-impressao{display:none}
+@media print{
+  .so-impressao{display:flex}
+  footer.so-impressao{display:block;margin-top:14px}
+  .grade-bi{grid-template-columns:1fr !important;gap:12px}
+  .painel-bi{box-shadow:none;border:1px solid var(--linha);break-inside:avoid;page-break-inside:avoid}
+  .rel-cab.so-impressao{margin-bottom:14px}
+  .grafico-rolavel svg{min-width:0 !important}
+  .ppc-barras,.tabela-bi{min-width:0}
+}
+/* BI etapa 3: contratos & medições, materiais */
+.mini-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media (min-width:640px){ .mini-cards{grid-template-columns:repeat(4,1fr)} .mini-cards-5{grid-template-columns:repeat(5,1fr)} }
+.mini-card{border:1px solid var(--linha);border-top:4px solid var(--texto-2);border-radius:var(--raio);padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.mini-card .rot{font-size:12px;font-weight:600;color:var(--texto-2);line-height:1.2}
+.mini-card b{font-size:26px;line-height:1.1}
+.mini-card .det{font-size:12px;color:var(--texto-2);overflow-wrap:anywhere}
+.mini-card.st-enviado{border-top-color:var(--acento)}
+.mini-card.st-ativo{border-top-color:var(--bi-teal)}
+.mini-card.st-concluido{border-top-color:var(--verde)}
+.tabela-rolavel{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabela-bi{width:100%;min-width:460px;border-collapse:collapse;font-size:14px}
+.tabela-bi th,.tabela-bi td{padding:8px 6px;border-bottom:1px solid var(--linha);text-align:left;vertical-align:middle}
+.tabela-bi th{font-size:12px;color:var(--texto-2);font-weight:700}
+.tabela-bi .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.barra-celula{position:relative;display:block;height:22px;min-width:110px;background:#F1F4F7;border-radius:4px;overflow:hidden}
+.barra-celula i{position:absolute;inset:0 auto 0 0;background:var(--bi-teal-claro);border-right:3px solid var(--bi-teal)}
+.barra-celula b{position:relative;display:block;padding:0 8px;line-height:22px;font-size:13px}
+.barras-saldo .pareto-trilho i{background:var(--bi-teal)}
+.barras-saldo .pareto-rot{display:flex;flex-direction:column;line-height:1.2}
+.barras-saldo .pareto-rot small{font-size:12px;color:var(--texto-2)}
+.card-atraso{border:1px solid var(--linha);border-radius:var(--raio);padding:12px}
+.card-atraso.tem{border-color:var(--vermelho);background:var(--fundo-verm)}
+.card-atraso .titulo-grafico{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.num-grande{font-size:30px;line-height:1}
+.card-atraso.tem .num-grande{color:var(--verm-forte)}
+.lista-atraso{list-style:none;display:flex;flex-direction:column;gap:6px}
+.lista-atraso li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:14px}
+.lista-atraso li span:last-child{flex-basis:100%;color:var(--texto-2);font-size:13px}
+.lead-grande{font-size:32px;font-weight:700;line-height:1.1}
+.lead-grande small{font-size:16px;color:var(--texto-2)}
+.lead-barras{display:flex;gap:8px;margin-top:6px}
+.lead-trilho{height:90px}
+.lead-trilho i{display:block;width:100%;background:var(--acento);border-radius:4px}
 .donut-bloco{display:flex;flex-direction:column;align-items:center;gap:12px}
 .donut{width:160px;height:160px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .donut-furo{width:104px;height:104px;border-radius:50%;background:var(--cartao);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}

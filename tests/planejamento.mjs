@@ -231,7 +231,8 @@ conferir('desfazer o não realizado da subtarefa', desfazerSubtarefaNaoRealizada
 const comCausas = planejadasJE.map((a) => (a.id === 'at-09' ? hidrNR : a.id === 'at-06' ? subtarefaNaoRealizada(alv2, 'st-05', { causa: 'clima', obs: '' }, semAtual) : a))
 conferir('causas da semana, mais frequente primeiro', causasDaSemana(comCausas, semAtual), [{ causa: 'clima', rotulo: 'Clima (chuva)', vezes: 2 }])
 conferir('causas de outra semana não entram', causasDaSemana(planejadasJE, semAtual), [])
-conferir('na semana passada aparecem as da laje', causasDaSemana(je, semanaDe('2026-10-12')), [{ causa: 'material', rotulo: 'Falta de material', vezes: 2 }])
+conferir('na semana passada aparecem as da laje e a das vergas', causasDaSemana(je, semanaDe('2026-10-12')),
+  [{ causa: 'material', rotulo: 'Falta de material', vezes: 2 }, { causa: 'projeto', rotulo: 'Projeto (falta ou erro)', vezes: 1 }])
 
 // ---------- configuração e casos de borda ----------
 conferir('config padrão é válida', validarConfig(cfg), {})

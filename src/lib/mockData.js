@@ -111,6 +111,7 @@ export const ATIVIDADES_PLANEJAMENTO = [
       { id: 'st-01', texto: 'Escoramento e fôrmas', feita: true, nao_realizado: null },
       { id: 'st-02', texto: 'Armação (vergalhão CA-50)', feita: false, nao_realizado: { causa: 'material', obs: '', semana: '2026-10-12' } },
       { id: 'st-03', texto: 'Concretagem', feita: false, nao_realizado: null },
+      { id: 'st-09', texto: 'Fôrmas das vigas', feita: false, nao_realizado: { causa: 'equipamento', obs: 'Serra circular quebrada', semana: '2026-09-21' } },
     ],
     restricoes: [
       { id: 'rs-01', descricao: 'Vergalhão CA-50 atrasado no fornecedor', tipo: 'material', prazo: '2026-10-21', responsavel: 'Compras', semana: '2026-10-19', resolvida: false },
@@ -123,8 +124,8 @@ export const ATIVIDADES_PLANEJAMENTO = [
     id: 'at-06', obra_id: 'obra-je', pai_id: 'at-04', ordem: 2, titulo: 'Alvenaria 2º pavimento', inicio: '2026-10-05', fim: '2026-11-13', progresso: 60, status: 'em_andamento',
     subtarefas: [
       { id: 'st-04', texto: 'Marcação da 1ª fiada', feita: true, nao_realizado: null },
-      { id: 'st-05', texto: 'Elevação até o respaldo', feita: false, nao_realizado: null },
-      { id: 'st-06', texto: 'Vergas e contravergas', feita: false, nao_realizado: null },
+      { id: 'st-05', texto: 'Elevação até o respaldo', feita: false, nao_realizado: { causa: 'clima', obs: 'Chuva forte na quarta e na quinta', semana: '2026-10-05' } },
+      { id: 'st-06', texto: 'Vergas e contravergas', feita: false, nao_realizado: { causa: 'projeto', obs: 'Faltou o detalhe das vergas das janelas', semana: '2026-10-12' } },
     ],
     restricoes: [
       { id: 'rs-03', descricao: 'Contratar o 2º pedreiro da equipe', tipo: 'mao_de_obra', prazo: '2026-10-09', responsavel: 'Mestre Ricardo', semana: '2026-10-05', resolvida: true },
@@ -133,9 +134,10 @@ export const ATIVIDADES_PLANEJAMENTO = [
   atv({ id: 'at-07', obra_id: 'obra-je', pai_id: null, ordem: 3, titulo: 'Instalações', inicio: '2026-10-01', fim: '2026-11-06' }),
   atv({
     id: 'at-08', obra_id: 'obra-je', pai_id: 'at-07', ordem: 1, titulo: 'Elétrica — tubulação', inicio: '2026-10-01', fim: '2026-10-23', progresso: 25, status: 'em_andamento',
+    nao_realizado: { causa: 'servico_anterior', obs: 'Laje ainda não liberada para os eletrodutos', semana: '2026-09-28' },
     subtarefas: [
       { id: 'st-07', texto: 'Eletrodutos na laje', feita: true, nao_realizado: null },
-      { id: 'st-08', texto: 'Caixas 4x2 nas paredes', feita: false, nao_realizado: null },
+      { id: 'st-08', texto: 'Caixas 4x2 nas paredes', feita: false, nao_realizado: { causa: 'mao_de_obra', obs: 'O eletricista faltou dois dias', semana: '2026-10-05' } },
     ],
   }),
   atv({

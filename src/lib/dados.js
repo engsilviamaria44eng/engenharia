@@ -473,12 +473,11 @@ export function salvarObservacaoGemba(observacao) {
 // ---------- relatórios (BI) ----------
 // Lê de uma vez o que cada módulo tem da obra aberta. Um módulo que falhar não derruba os
 // outros: ele volta como null e o erro vai em `erros` (o painel dele mostra o aviso).
-// Módulo que ainda não existe (ex.: Diário de Obra) também volta como null.
 export async function carregarFontesDoBI() {
   if (!obraAtualId) return semObra()
-  const [ra, rc, rm, rp, rcat, rq, rf, rg] = await Promise.all([
+  const [ra, rc, rm, rp, rcat, rq, rf, rg, rd] = await Promise.all([
     listarAtividadesPlanejamento(), lerConfigPlanejamento(), listarMedicoesDaObra(), listarPedidos(),
-    listarCatalogoMateriais(), listarPendencias(), listarFvs(), listarGemba(),
+    listarCatalogoMateriais(), listarPendencias(), listarFvs(), listarGemba(), listarDiarios(),
   ])
   const erros = {}
   const pega = (r, modulo) => { if (r.erro) { erros[modulo] = r.erro; return null } return r.data }
@@ -491,7 +490,7 @@ export async function carregarFontesDoBI() {
       pedidos: pega(rp, 'materiais'), catalogo: pega(rcat, 'materiais'),
       pendencias: pega(rq, 'qualidade'), vistorias: fvs?.vistorias ?? null, ncs: fvs?.ncs ?? null, modelosFvs: fvs?.modelos ?? null,
       gemba: pega(rg, 'qualidade'),
-      diarios: null, // entra na etapa 2 do BI (Ritmo e Produção), via listarDiarios
+      diarios: pega(rd, 'diario'),
     },
     erros,
   })
